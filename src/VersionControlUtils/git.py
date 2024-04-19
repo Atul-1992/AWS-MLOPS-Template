@@ -143,7 +143,7 @@ class GitHelper:
             tags_list = result.stdout.strip().split('\n')
 
             if tags_list:
-                tags_list = [int(self.parse_version(tag)) for tag in tags_list]
+                tags_list = [int(self.parse_version(tag, tag_prefix)) for tag in tags_list]
                 # Find the latest tag based on semantic versioning (assuming tags are in format '{prefix}X.Y.Z')
                 latest_tag = max(tags_list)
                 return latest_tag
