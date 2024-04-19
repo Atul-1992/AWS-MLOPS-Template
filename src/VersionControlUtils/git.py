@@ -152,10 +152,10 @@ class GitHelper:
             print(f"Error: {e}")
             return None
 
-    def parse_version(self, version):
+    def parse_version(self, version, tag_prefix):
         # Parse the version string (e.g., '1.2.3') into a tuple of integers
         try:
-            return (int(part) for part in version.split('.'))
+            return (int(part[len(tag_prefix):]) for part in version if part[len(tag_prefix):].is_digit())
         except:
             return 0
 
