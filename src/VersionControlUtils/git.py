@@ -125,7 +125,7 @@ class GitHelper:
     def version_code(self, tag_prefix='v'):
         # Retrieve the latest tag of the specified prefix to determine the next version number
         latest_tag = self.get_latest_tag(tag_prefix)
-        next_version = self.increment_version(tag_prefix=tag_prefix, version=latest_tag)
+        next_version = int(latest_tag[len(tag_prefix):]) + 1
 
         if next_version:
             # Tag the current commit with the next version number
@@ -143,9 +143,7 @@ class GitHelper:
             tags_list = result.stdout.strip().split('\n')
 
             if tags_list:
-                tags_list = [
-                    # self.parse_version(tag, tag_prefix=tag_prefix)
-                     print(tag) for tag in tags_list if tag is not None]
+                tags_list = [self.parse_version(tag, tag_prefix=tag_prefix) for tag in tags_list if tag is not None]
                 print(tags_list)
                 # Find the latest tag based on semantic versioning (assuming tags are in format '{prefix}X.Y.Z')
                 latest_tag = max(tags_list)
@@ -160,23 +158,6 @@ class GitHelper:
         tag = version[len(tag_prefix):]
         if tag.isdigit():
             return tag
-
-
-    def increment_version(self, tag_prefix, version):
-        # Increment the version number based on the latest tag
-        if version:
-            try:
-                # Extract the numeric part of the tag (e.g., "v1.2.3" -> "1.2.3")
-                numeric_version = version[len(tag_prefix):]
-                version_parts = numeric_version.split('.')
-                version_parts[-1] = str(int(version_parts[-1]) + 1)  # Increment the last part (patch version)
-                next_version = '.'.join(version_parts)
-                return next_version
-            except ValueError as e:
-                print(f"Error: Invalid version format - {version}")
-                return None
-        else:
-            return "1.0.0"  # Initial version if no tags exist
 
     def tag_commit(self, tag_name):
         # Tag the current commit with the specified tag name
