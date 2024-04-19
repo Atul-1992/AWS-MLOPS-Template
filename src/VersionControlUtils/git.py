@@ -10,7 +10,7 @@ class GitHelper:
         self.version = 0
         if not self.is_git_repo():
             self.init()
-        self.remote_url = self.get_remote_url(remote_name)
+        self.remote_url = remote_url
         self.remote_name = remote_name
 
     def is_git_repo(self):
