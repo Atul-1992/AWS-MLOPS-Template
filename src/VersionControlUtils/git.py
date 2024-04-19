@@ -125,6 +125,7 @@ class GitHelper:
     def version_code(self, tag_prefix='v'):
         # Retrieve the latest tag of the specified prefix to determine the next version number
         latest_tag = self.get_latest_tag(tag_prefix)
+        print(latest_tag)
         next_version = self.increment_version(tag_prefix=tag_prefix, version=latest_tag)
 
         if next_version:
