@@ -40,7 +40,7 @@ class GeneralProcess:
 		# self.git_helper.add(['.dvc', 'data_dir.dvc'])
 		self.git_helper.commit(f'Initial commit with code version: {self.code_version}')
 		self.git_helper.version_code()
-		self.git_helper.create_git_remote()
+		self.git_helper.create_remote()
 		self.dvc_helper.push()
 		self.git_helper.push()
 		return True
