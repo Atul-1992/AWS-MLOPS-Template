@@ -61,9 +61,8 @@ class GeneralProcess:
 		if self.git_helper.needs_commit():
 			self.git_helper.add(["./src/"])
 			self.git_helper.commit("Code updated with {}".format(self.code_version))
-			self.git_helper.tag({"Code Version: {}".format(self.code_version)})
-			self.git_helper.push()
 			self.git_helper.version_code()
+			self.git_helper.push()
 			return True
 		return False
 
