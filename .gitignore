@@ -27,3 +27,5 @@ aws_template_key.pem
 /env_files
 
 /data_dir
+
+/env_files
