@@ -86,15 +86,15 @@ class GitHelper:
         result = subprocess.run(["git", "-C", self.repo_dir, "remote", "get-url", remote_name], capture_output=True)
         return result.stdout.strip().decode("utf-8")
 
-    def version_code(self):
-        """
-        Create an annotated tag with the version number.
-        """
-        tag_name = f"Cv{self.version}"
-        subprocess.run(["git", "-C", self.repo_dir, "tag", "-a", tag_name, "-m", f"Code Version: v{self.version}"])
-        self.version += 1
-        print("Successfully versioned code")
-        return True
+    # def version_code(self):
+    #     """
+    #     Create an annotated tag with the version number.
+    #     """
+    #     tag_name = f"Cv{self.version}"
+    #     subprocess.run(["git", "-C", self.repo_dir, "tag", "-a", tag_name, "-m", f"Code Version: v{self.version}"])
+    #     self.version += 1
+    #     print("Successfully versioned code")
+    #     return True
 
     def tag(self, tags):
         """
