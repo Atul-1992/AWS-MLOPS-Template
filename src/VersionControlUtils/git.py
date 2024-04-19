@@ -154,7 +154,10 @@ class GitHelper:
 
     def parse_version(self, version):
         # Parse the version string (e.g., '1.2.3') into a tuple of integers
-        return tuple(int(part) for part in version.split('.'))
+        try:
+            return (int(part) for part in version.split('.'))
+        except:
+            return 0
 
     def increment_version(self, tag_prefix, version):
         # Increment the version number based on the latest tag
