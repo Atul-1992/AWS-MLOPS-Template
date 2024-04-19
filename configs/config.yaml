@@ -1,0 +1,5 @@
+defaults:
+  - aws: aws
+  - git: own
+  - dvc: gdrive
+  - docker: simple

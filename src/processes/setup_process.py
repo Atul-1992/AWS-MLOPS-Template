@@ -80,3 +80,29 @@ class GeneralProcess:
 
 	def stop_all_instances(self):
 		self.ec2_helper.stop_all_running_instances()
+
+
+def setup_general_process(config):
+    # Extract configuration parameters
+    local_data_dir = config.get('local_data_dir', 'data_dir')
+    dvc_remote_name = config.get('dvc_remote_name', 'gdrive')
+    dvc_remote_url = config.get('dvc_remote_url', None)
+    git_remote_name = config.get('git_remote_name', 'origin')
+    git_remote_url = config.get('git_remote_url', None)
+    current_git_branch = config.get('current_git_branch', 'main')
+    docker_folder = config.get('docker_folder', 'docker_dir')
+    s3_bucket_path = config.get('s3_bucket_path', None)
+
+    # Create GeneralProcess instance with specified configuration
+    processes = GeneralProcess(
+        local_data_dir=local_data_dir,
+        dvc_remote_name=dvc_remote_name,
+        dvc_remote_url=dvc_remote_url,
+        git_remote_name=git_remote_name,
+        git_remote_url=git_remote_url,
+        current_git_branch=current_git_branch,
+        docker_folder=docker_folder,
+        s3_bucket_path=s3_bucket_path
+    )
+
+    return processes

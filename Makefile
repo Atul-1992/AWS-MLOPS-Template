@@ -1,14 +1,14 @@
-ENV_FILE := env_files/aws.env
+# ENV_FILE := env_files/aws.env
 
-include $(ENV_FILE)
-export
+# include $(ENV_FILE)
+# export
 
-export_aws_secrets:
-	@echo "Exporting AWS credentials..."
-	@set AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID); \
-	@set AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY); \
-	@set AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION); \
-	@echo "AWS credentials exported successfully.
+# export_aws_secrets:
+# 	@echo "Exporting AWS credentials..."
+# 	@set AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID); \
+# 	@set AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY); \
+# 	@set AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION); \
+# 	@echo "AWS credentials exported successfully.
 
 init:
 	python ./src/execute/init.py
@@ -27,3 +27,6 @@ version_code:
 
 stop_all_instances:
 	python ./src/execute/stop_all_instances.py
+
+check_configs:
+	python ./src/execute/check_configs.py

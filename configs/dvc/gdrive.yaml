@@ -1,0 +1,3 @@
+dvc_remote_name: 'gdrive'
+dvc_remote_url: 'https://drive.google.com/drive/folders/1YQKvAM4mhU688OBwIDJYfuz2SOAZqk8c?usp=sharing'
+local_data_dir: 'data_dir'

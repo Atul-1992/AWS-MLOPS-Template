@@ -1,0 +1,4 @@
+dockerfile_name: 'Dockerfile'
+image_name: 'demo_image'
+tag: 'v01'
+repository_name: 'sample_repo_1'
