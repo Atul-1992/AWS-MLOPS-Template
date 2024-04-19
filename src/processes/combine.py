@@ -58,12 +58,13 @@ class GeneralProcess:
 		return False
 
 	def version_code(self):
-		if self.git_helper.needs_commit(['./src/']):
+		if self.git_helper.needs_commit(['./src/', './configs/']):
 			self.git_helper.add(["."])
 			self.git_helper.commit("Code updated with {}".format(self.code_version))
 			self.git_helper.version_code()
 			self.git_helper.push()
 			return True
+		print("There is no change in `src` or `configs` folder to commit!")
 		return False
 
 	def push_on_ecr(self, dockerfile_name, image_name, tag, repository_name=None):
