@@ -156,7 +156,7 @@ class GitHelper:
     def parse_version(self, version, tag_prefix):
         # Parse the version string (e.g., '1.2.3') into a tuple of integers
         for part in version:
-            print(part[len(tag_prefix):].is_digit())
+            print(part[len(tag_prefix):].isdigit())
         return (int(part[len(tag_prefix):]) for part in version if part[len(tag_prefix):].isdigit())
 
 
