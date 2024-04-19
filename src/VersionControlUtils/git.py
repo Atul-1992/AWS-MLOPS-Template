@@ -144,7 +144,7 @@ class GitHelper:
 
             if tags_list:
                 for tag in tags_list:
-                    if tag is not None:
+                    if tag != None:
                         print(self.parse_version(tag, tag_prefix=tag_prefix) )
                 tags_list = [self.parse_version(tag, tag_prefix=tag_prefix) for tag in tags_list if tag is not None]
                 print(tags_list)
