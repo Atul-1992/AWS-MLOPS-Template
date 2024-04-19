@@ -57,6 +57,7 @@ class GitHelper:
             print(f"No remote URL found for remote '{remote_name}'")
             return False
         subprocess.run(["git", "-C", self.repo_dir, "push", "--set-upstream", remote_name, self.branch])
+        subprocess.run(["git", "-C", self.repo_dir, "push", "--tags"])
         print(f"Pushed commits to {remote_name}/{self.branch} from repository: {self.repo_dir}")
         return True
 
@@ -89,8 +90,8 @@ class GitHelper:
         """
         Create an annotated tag with the version number.
         """
-        tag_name = f"version-{self.version}"
-        subprocess.run(["git", "-C", self.repo_dir, "tag", "-a", tag_name, "-m", f"Version {self.version}"])
+        tag_name = f"Cv{self.version}"
+        subprocess.run(["git", "-C", self.repo_dir, "tag", "-a", tag_name, "-m", f"Code Version: v{self.version}"])
         self.version += 1
         print("Successfully versioned code")
         return True
@@ -120,3 +121,112 @@ class GitHelper:
         subprocess.run(["git", "-C", self.repo_dir, "add", gitignore_path])
         subprocess.run(["git", "-C", self.repo_dir, "commit", "-m", f"Ignore {directory_name}"])
         return True
+
+    def version_code(self, tag_prefix='v'):
+        # Retrieve the latest tag of the specified prefix to determine the next version number
+        latest_tag = self.get_latest_tag(tag_prefix)
+        next_version = self.increment_version(tag_prefix=tag_prefix, version=latest_tag)
+
+        if next_version:
+            # Tag the current commit with the next version number
+            tag_name = f"{tag_prefix}{next_version}"
+            self.tag_commit(tag_name)
+
+            print(f"Tagged current commit with version: {tag_name}")
+        else:
+            print("Error: Failed to increment version.")
+
+    def get_latest_tag(self, tag_prefix):
+        # Get the latest tag with the specified prefix in the repository
+        try:
+            result = subprocess.run(['git', "-C", self.repo_dir, 'tag', '--list', f'{tag_prefix}*'], capture_output=True, text=True)
+            tags_list = result.stdout.strip().split('\n')
+
+            if tags_list:
+                # Find the latest tag based on semantic versioning (assuming tags are in format '{prefix}X.Y.Z')
+                latest_tag = max(tags_list, key=lambda x: parse_version(x[len(tag_prefix):]))
+                return latest_tag
+            else:
+                return None
+        except subprocess.CalledProcessError as e:
+            print(f"Error: {e}")
+            return None
+
+    def parse_version(self, version):
+        # Parse the version string (e.g., '1.2.3') into a tuple of integers
+        return tuple(int(part) for part in version.split('.'))
+
+    def increment_version(self, tag_prefix, version):
+        # Increment the version number based on the latest tag
+        if version:
+            try:
+                # Extract the numeric part of the tag (e.g., "v1.2.3" -> "1.2.3")
+                numeric_version = version[len(tag_prefix):]
+                version_parts = numeric_version.split('.')
+                version_parts[-1] = str(int(version_parts[-1]) + 1)  # Increment the last part (patch version)
+                next_version = '.'.join(version_parts)
+                return next_version
+            except ValueError as e:
+                print(f"Error: Invalid version format - {version}")
+                return None
+        else:
+            return "1.0.0"  # Initial version if no tags exist
+
+    def tag_commit(self, tag_name):
+        # Tag the current commit with the specified tag name
+        try:
+            subprocess.run(['git', "-C", self.repo_dir, 'tag', tag_name])
+        except subprocess.CalledProcessError as e:
+            print(f"Error: {e}")
+            
+    def create_branch(self, branch_name):
+        try:
+            subprocess.run(['git', "-C", self.repo_dir, 'branch', branch_name])
+            print(f"Created branch '{branch_name}'")
+        except subprocess.CalledProcessError as e:
+            print(f"Error creating branch: {e}")
+
+    def switch_to_branch(self, branch_name):
+        try:
+            subprocess.run(['git', "-C", self.repo_dir, 'checkout', branch_name])
+            self.branch = branch_name
+            print(f"Switched to branch '{branch_name}'")
+        except subprocess.CalledProcessError as e:
+            print(f"Error switching to branch: {e}")
+
+    def create_and_switch_to_branch(self, branch_name):
+        self.create_branch(branch_name=branch_name)
+        self.switch_to_branch(branch_name=branch_name)
+
+    def list_branches(self):
+        try:
+            # Run 'git branch' command to list all branches
+            result = subprocess.run(['git', "-C", self.repo_dir, 'branch'], capture_output=True, text=True)
+            
+            # Get the output from the command
+            output = result.stdout.strip()
+            
+            # Split the output into lines to extract branch names
+            branches = [line.lstrip('* ').strip() for line in output.split('\n')]
+            
+            # Print the list of branches
+            if branches:
+                print("List of branches:")
+                for branch in branches:
+                    print(branch)
+            else:
+                print("No branches found.")
+        except subprocess.CalledProcessError as e:
+            print(f"Error listing branches: {e}")
+        
+    def latest_branch_tag(self, prefix='ds-'):
+        branch_names = self.list_branches()
+        data_branches = [branch for branch in branch_names if prefix in branch]
+        return max([int(branch[len(prefix):]) for branch in data_branches])
+    
+    def create_new_ds_branch(self):
+        latest_tag = self.latest_branch_tag() + 1
+        self.create_and_switch_to_branch(f'ds-{latest_tag}')
+    
+    def version_dataset(self):
+        self.create_and_switch_to_branch()

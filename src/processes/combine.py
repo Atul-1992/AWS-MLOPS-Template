@@ -38,7 +38,7 @@ class GeneralProcess:
 		self.git_helper.add_to_gitignore('/env_files')
 		self.git_helper.add(['.'])
 		# self.git_helper.add(['.dvc', 'data_dir.dvc'])
-		self.git_helper.commit(f'Initial commit with code version: {self.code_version}')
+		self.git_helper.commit(f'Initialized with code version: {self.code_version}')
 		self.git_helper.version_code()
 		self.git_helper.create_remote()
 		self.dvc_helper.push()
@@ -58,12 +58,12 @@ class GeneralProcess:
 		return False
 
 	def version_code(self):
-		if self.git_helper.needs_update_in_directory("./src"):
+		if self.git_helper.needs_commit():
 			self.git_helper.add(["./src/"])
 			self.git_helper.commit("Code updated with {}".format(self.code_version))
 			self.git_helper.tag({"Code Version: {}".format(self.code_version)})
 			self.git_helper.push()
-			self.code_version += 1
+			self.git_helper.version_code()
 			return True
 		return False
 
