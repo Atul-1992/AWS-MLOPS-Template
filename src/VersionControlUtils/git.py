@@ -125,7 +125,6 @@ class GitHelper:
     def version_code(self, tag_prefix='v'):
         # Retrieve the latest tag of the specified prefix to determine the next version number
         latest_tag = self.get_latest_tag(tag_prefix)
-        print(latest_tag)
         next_version = self.increment_version(tag_prefix=tag_prefix, version=latest_tag)
 
         if next_version:
@@ -156,6 +155,8 @@ class GitHelper:
     def parse_version(self, version, tag_prefix):
         # Parse the version string (e.g., '1.2.3') into a tuple of integers
         try:
+            for part in version:
+                print(part[len(tag_prefix):].is_digit())
             return (int(part[len(tag_prefix):]) for part in version if part[len(tag_prefix):].is_digit())
         except:
             return 0
