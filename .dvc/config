@@ -1,0 +1,4 @@
+[core]
+    no_scm = True
+['remote "gdrive"']
+    url = https://drive.google.com/drive/folders/1YQKvAM4mhU688OBwIDJYfuz2SOAZqk8c?usp=sharing
