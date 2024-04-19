@@ -89,7 +89,7 @@ This part is our objective to create. We can alway add more cli command to creat
 
    3. `make version_dataset`: It tag version to current dataset if there is any change in it and syc it with remote repo.
 
-   4. `make version_code`: It tag version to our code and syc it with remote repo.
+   4. `make version_code`: It tag version to our code and syc it with remote repo. It will auto increment version of code and push it to repo with tag.
 
    5. `make push_on_ecr`: containerize our code and push it AWS ECR.
 
