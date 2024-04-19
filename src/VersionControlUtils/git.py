@@ -41,7 +41,7 @@ class GitHelper:
         """
         Commit changes in a local Git repository.
         """
-        if self.needs_commit():
+        if self.needs_commit(['.']):
             subprocess.run(["git", "-C", self.repo_dir, "commit", "-m", commit_message])
             print(f"Committed changes to repository '{self.repo_dir}' with message: {commit_message}")
             return True
@@ -72,11 +72,26 @@ class GitHelper:
         print(f"Successfully created remote '{self.remote_name}' ({self.remote_url}) in repository: {self.repo_dir}")
         return True
 
-    def needs_commit(self):
+    def needs_commit(self, directories):
         """
-        Check if there are changes to commit in the local Git repository.
+        Check if there are changes to commit in specific directories of the local Git repository.
+
+        Args:
+        - directories (list of str): List of directory paths to check for changes.
+
+        Returns:
+        - bool: True if there are changes in any of the specified directories, False otherwise.
         """
-        result = subprocess.run(["git", "-C", self.repo_dir, "status", "--porcelain"], capture_output=True)
+        # Construct the git status command with pathspec options for specified directories
+        git_command = ["git", "-C", self.repo_dir, "status", "--porcelain"]
+        
+        for directory in directories:
+            git_command.extend(['--', directory])
+
+        # Run git status command to check for changes in specified directories
+        result = subprocess.run(git_command, capture_output=True, text=True)
+        
+        # Check if there is any output from git status (indicating changes)
         return bool(result.stdout.strip())
 
     def get_remote_url(self, remote_name):
