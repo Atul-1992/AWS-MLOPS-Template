@@ -1,9 +1,16 @@
 # AWS MLOPS Project Template
 
 This repository aims to provide a machine learning pipeline with all necessary functionality to train and evaluate models in a cloud environment through a single entry point.
-**This project is created in very modular structure so that we can add and remove any functionality easily as per our growing need.**
+This project is created in very modular structure so that we can add and remove any functionality easily as per our need.
 
-## Project Overview
+**Documentation Structure:**
+
+- [Project Overview](#project-overview)
+- [Template Structure](#template-structure)
+- [Project Setup](#project-setup)
+- [CLI (How to use this template?)](#cli-how-to-use-this-template)
+
+## <a id="project-overview">Project Overview</a>
 
 - **Development Environment Setup:**
   - Includes Data Versioning, Code Versioning, Containerization, and deployment of containers to AWS for training in the cloud.
@@ -21,7 +28,7 @@ This repository aims to provide a machine learning pipeline with all necessary f
 - **Deployment Strategy:**
   - Deploys a Containerized Flask Application in a cloud environment for seamless deployment and scaling.
 
-## Tasks for Template Creation
+## <a id="template-structure">Template Structure</a>
 
 This template can be reused multiple times. Below are the building blocks of this template for better understanding:
 
@@ -64,15 +71,18 @@ This template can be reused multiple times. Below are the building blocks of thi
 
 Refer to this guide for understanding the structure and purpose of this project template. Customize and utilize the provided building blocks to create robust and scalable machine learning pipelines in a cloud environment.
 
-## Setting up the Project
+## <a id="project-setup">Project Setup</a>
 
-1. **Git Configuration:**
+1. **Installations:**
+   You need to install and setup Git, DVC, Hydra, AWS CLI & boto3, gcc (for makefile), Mlflow and Docker before preceding with this template.
+
+2. **Git Configuration:**
    - Ensure Git is installed and configured on your machine.
    - Create a remote repository on GitHub (or another Git hosting service) without adding any files.
    - Provide the repository URL for configuration.
    - To know more about git commands, please visit -> [Git Docs](https://git-scm.com/docs)
 
-2. **AWS CLI Configuration:**
+3. **AWS CLI Configuration:**
    - Make sure the AWS Command Line Interface (CLI) is installed and configured.
    - Set AWS credentials using environment variables or a `.env` file (`./env_files/aws.env`):
      ```plaintext
@@ -82,16 +92,16 @@ Refer to this guide for understanding the structure and purpose of this project 
      ```
      Ensure `./env_files/aws.env` is added to `.gitignore` to avoid committing sensitive information.
 
-3. **Docker Setup:**
+4. **Docker Setup:**
    - Ensure Docker Engine is installed and running on your machine.
    - To know more about Docker, please visit -> [Docker Docs](https://docs.docker.com/)
 
-4. **Hydra Config:**
+5. **Hydra Config:**
    - This will be second most used functionality after `Makefile` cli. Basically we set all of our configuration separately in `configs` folder where we can change set our configuration and work on our code virtually independently. All the configurations are written in simple `.yaml` files.
    - Alternatively we can set our configuration pythonically as done in `config_schemas` folder. For simplicity and to keep code relevent with respect to warnings, I choose to change schemas `config_name` to `config_schema_node`. If we keep the same name as our main `config`.yaml it will validate schema of our `configs` directory. This feature is expected to depreciate due to complexity caused by it, therefore I am keeping my schema and configs different.
    - For more information on it, please visit -> [Hydra Docs](https://hydra.cc/docs/intro/)
 
-## CLI (How to use it?):
+## <a id="cli-how-to-use-this-template">CLI (How to use this template?):</a>
 This part is our objective to create. We can alway add more cli command to create more processes as per our requirements.
 
    1. `export_aws_secrets`: set credentials set in `./env_files/aws.env` as environment variables. (You can delete this file after setting credentials, it will not affect functionality.)
