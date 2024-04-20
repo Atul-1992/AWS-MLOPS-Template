@@ -84,14 +84,14 @@ class GeneralProcess:
 
 def setup_general_process(config):
     # Extract configuration parameters
-    local_data_dir = config.get('local_data_dir', 'data_dir')
-    dvc_remote_name = config.get('dvc_remote_name', 'gdrive')
-    dvc_remote_url = config.get('dvc_remote_url', None)
-    git_remote_name = config.get('git_remote_name', 'origin')
-    git_remote_url = config.get('git_remote_url', None)
-    current_git_branch = config.get('current_git_branch', 'main')
-    docker_folder = config.get('docker_folder', 'docker_dir')
-    s3_bucket_path = config.get('s3_bucket_path', None)
+    local_data_dir = config['dvc']['local_data_dir']
+    dvc_remote_name = config['dvc']['dvc_remote_name']
+    dvc_remote_url = config['dvc']['dvc_remote_url']
+    git_remote_name = config['git']['git_remote_name']
+    git_remote_url = config['git']['git_remote_url']
+    current_git_branch = config['git']['current_git_branch']
+    docker_folder = config['docker']['docker_folder']
+    s3_bucket_path = config['aws']['s3']['storage_url']
 
     # Create GeneralProcess instance with specified configuration
     processes = GeneralProcess(

@@ -1,30 +1,22 @@
 # ./src/execute/run_on_ec2.py
 import os
 import sys
+import hydra
+from omegaconf import DictConfig
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 sys.path.append(project_root)
-from src.execute.ActSetup import processes
+from src.processes.setup_process import setup_general_process
 
-image_id = 'ami-001843b876406202a'
-instance_type = 't2.micro'
-ingress_rules = [
-			{
-				'IpProtocol': 'tcp',
-				'FromPort': 22,
-				'ToPort': 22,
-				'IpRanges': [{'CidrIp': '0.0.0.0/0'}],  # Allow SSH from anywhere
-			}
-]
-userdata_script = '''#!/bin/bash
-	yum update -y
-	yum install -y httpd
-	systemctl start httpd
-	systemctl enable httpd
-	echo "<html><body><h1>Welcome to My Website</h1></body></html>" > /var/www/html/index.html
-	'''
+@hydra.main(config_name='config', config_path='../../configs', version_base=None)
+def main(cfg: DictConfig)-> None:
+	processes = setup_general_process(cfg)
+	processes.create_instance(image_id=cfg['aws']['ec2']['image_id'], 
+						   instance_type=cfg['aws']['ec2']['instance_type'], 
+						   ingress_rules=cfg['aws']['ec2']['ingress_rules'], 
+						   userdata_script=cfg['aws']['ec2']['userdata_script']['script'])
 
 
 if __name__=='__main__':
-	processes.create_instance(image_id=image_id, instance_type=instance_type, ingress_rules=ingress_rules, userdata_script=userdata_script)
+	main()

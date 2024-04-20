@@ -1,4 +1,4 @@
-defults:
+defaults:
   - ec2: general
   - ecr: ecr
   - s3: general

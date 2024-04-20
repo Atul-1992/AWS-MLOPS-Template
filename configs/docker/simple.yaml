@@ -1,1 +1,4 @@
 docker_folder: 'docker_dir'
+dockerfile_name: 'Dockerfile'
+image_name: 'demo_image'
+tag: 'v01'

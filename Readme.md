@@ -1,12 +1,16 @@
-# AWS Project Template
+# AWS MLOPS Project Template
 
 This repository aims to provide a machine learning pipeline with all necessary functionality to train and evaluate models in a cloud environment through a single entry point.
+**This project is created in very modular structure so that we can add and remove any functionality easily as per our growing need.**
 
 ## Project Overview
 
 - **Development Environment Setup:**
   - Includes Data Versioning, Code Versioning, Containerization, and deployment of containers to AWS for training in the cloud.
   - Utilizes [DVC](https://dvc.org/), Git, Docker, and AWS/Boto3 for streamlined development processes.
+
+- **Configuration Management:**
+   - With [Hydra](https://hydra.cc/docs/intro/), we manage our configuration of setup and Machine Learning Experiment separately. It helps us keep our code clean and untouched unless we really need to change it.
 
 - **Experimentation Features:**
   - Provides Tracking and Model Registry functionality using [MLflow](https://mlflow.org/) and [Hydra](https://hydra.cc/) for Configuration Management.
@@ -66,6 +70,7 @@ Refer to this guide for understanding the structure and purpose of this project 
    - Ensure Git is installed and configured on your machine.
    - Create a remote repository on GitHub (or another Git hosting service) without adding any files.
    - Provide the repository URL for configuration.
+   - To know more about git commands, please visit -> [Git Docs](https://git-scm.com/docs)
 
 2. **AWS CLI Configuration:**
    - Make sure the AWS Command Line Interface (CLI) is installed and configured.
@@ -79,18 +84,26 @@ Refer to this guide for understanding the structure and purpose of this project 
 
 3. **Docker Setup:**
    - Ensure Docker Engine is installed and running on your machine.
+   - To know more about Docker, please visit -> [Docker Docs](https://docs.docker.com/)
+
+4. **Hydra Config:**
+   - This will be second most used functionality after `Makefile` cli. Basically we set all of our configuration separately in `configs` folder where we can change set our configuration and work on our code virtually independently. All the configurations are written in simple `.yaml` files.
+   - Alternatively we can set our configuration pythonically as done in `config_schemas` folder. For simplicity and to keep code relevent with respect to warnings, I choose to change schemas `config_name` to `config_schema_node`. If we keep the same name as our main `config`.yaml it will validate schema of our `configs` directory. This feature is expected to depreciate due to complexity caused by it, therefore I am keeping my schema and configs different.
+   - For more information on it, please visit -> [Hydra Docs](https://hydra.cc/docs/intro/)
 
 ## CLI (How to use it?):
 This part is our objective to create. We can alway add more cli command to create more processes as per our requirements.
 
    1. `export_aws_secrets`: set credentials set in `./env_files/aws.env` as environment variables. (You can delete this file after setting credentials, it will not affect functionality.)
 
-   2. `make init`: start dvc, git, version dataset and git, add remote and push our code and dataset to git and remote storage.
+   2. `make check_configs`: prints our current config defined in hydra `configs` folder, we can change it it `configs` folder.
 
-   3. `make version_dataset`: It tag version to current dataset if there is any change in it and syc it with remote repo.
+   3. `make init`: start dvc, git, version dataset and git, add remote and push our code and dataset to git and remote storage.
 
-   4. `make version_code`: It tag version to our code and syc it with remote repo. It will auto increment version of code and push it to repo with tag.
+   4. `make version_dataset`: It tag version to current dataset if there is any change in it and syc it with remote repo.
 
-   5. `make push_on_ecr`: containerize our code and push it AWS ECR.
+   5. `make version_code`: It tag version to our code and syc it with remote repo. It will auto increment version of code and push it to repo with tag.
 
-   6. `make run_on_ec2`: launches ec2 instance on aws and pull docker container from ecr then run our container.
+   6. `make push_on_ecr`: containerize our code and push it AWS ECR.
+
+   7. `make run_on_ec2`: launches ec2 instance on aws and pull docker container from ecr then run our container.
