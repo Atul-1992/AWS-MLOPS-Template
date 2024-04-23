@@ -67,6 +67,9 @@ This template can be reused multiple times. Below are the building blocks of thi
    - `version_dataset.py` It version contol our dataset in standard format with dvc and git.
    - we can further add more scripts to it using our building block in very easy by adding more functions to `GeneralProcess` class in combine directory and the calling it in script. 
 
+10. **app (Flask):**
+   - Flask app with user registration and authentication feature, it includes it's own sqlite database for user information.
+
 ---
 
 Refer to this guide for understanding the structure and purpose of this project template. Customize and utilize the provided building blocks to create robust and scalable machine learning pipelines in a cloud environment.
@@ -106,7 +109,7 @@ This part is our objective to create. We can alway add more cli command to creat
 
    1. `export_aws_secrets`: set credentials set in `./env_files/aws.env` as environment variables. (You can delete this file after setting credentials, it will not affect functionality.)
 
-   2. `make check_configs`: prints our current config defined in hydra `configs` folder, we can change it it `configs` folder.
+   2. `make check_configs`: prints our current config defined in hydra `configs` folder, we can change it it `configs` folder. It is always good idea to check configuration before working with this templates. You can alway edit your configuration in `configs` folder.
 
    3. `make init`: start dvc, git, version dataset and git, add remote and push our code and dataset to git and remote storage.
 
@@ -114,6 +117,11 @@ This part is our objective to create. We can alway add more cli command to creat
 
    5. `make version_code`: It tag version to our code and syc it with remote repo. It will auto increment version of code and push it to repo with tag.
 
-   6. `make push_on_ecr`: containerize our code and push it AWS ECR.
+   6. `make push_on_ecr`: containerize our code and push it AWS ECR.It will name and tag our container as as per our configuration.
 
    7. `make run_on_ec2`: launches ec2 instance on aws and pull docker container from ecr then run our container.
+   It will create new instance as per our configuration and userdata or start old one with new userdata if instance with the same name already exists.It will also create a `key_pair` to ssh into instance if key_pair does not exits and `.gitignore` it. If you have lost old key_pair, Kindly download it manually and `.gitignore` it to make this code work.
+
+   8. `make stop_all_instances`: Will stop all containers in your containers in your aws account, so use it carefully. You can always add or alter code to match your requirements.
+
+**Note:** Commands like `run_on_ec2` and `stop_all_instances` may take time to respond, as they are configured to wait till instances are in `running` or all instances are in `stopped` state. Still It is always good idea to check these on your aws account manually which does not take much effort. Atleast always check status of your command.

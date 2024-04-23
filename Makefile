@@ -30,3 +30,6 @@ stop_all_instances:
 
 check_configs:
 	python ./src/execute/check_configs.py
+
+ssh_instance:
+	ssh -i my-key-pair.pem ec2-user@<public_ip>

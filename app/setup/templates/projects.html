@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+	{% block content %}
+		{% for project in projects %}
+			<a href="">
+				<dl class="row">
+					<dt class="col-sm-3">Project Name</dt>
+					<dd class="col-sm-9">{{project.name}}</dd>
+				
+					<dt class="col-sm-3">Project Category</dt>
+					<dd class="col-sm-9">
+					{{project.category}}
+					</dd>
+				
+					<dt class="col-sm-3 ">Project Description</dt>
+					<dd class="col-sm-9">
+						{{project.description}}
+					</dd>
+					
+					<dt class="col-sm-3">Skills Used</dt>
+					<dd class="col-sm-9">{{project.skills_used}}</dd>
+				</dl>
+
+			</a>
+		{% endfor %}
+	{% endblock %}

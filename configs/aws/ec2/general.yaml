@@ -4,5 +4,8 @@ defaults:
   - userdata_script: demo
   - _self_
 
+instance_name: 'instance_2'
+group_name: 'aws_template_1'
+key_pair: 'aws_template_key'
 image_id: 'ami-001843b876406202a'
 instance_type: 't2.micro'

@@ -13,7 +13,10 @@ from src.processes.setup_process import setup_general_process
 def main(cfg: DictConfig)-> None:
 	processes = setup_general_process(cfg)
 	processes.create_instance(image_id=cfg['aws']['ec2']['image_id'], 
-						   instance_type=cfg['aws']['ec2']['instance_type'], 
+						   instance_name=cfg['aws']['ec2']['instance_name'],
+						   instance_type=cfg['aws']['ec2']['instance_type'],
+						   group_name=cfg['aws']['ec2']['group_name'],
+						   key_pair=cfg['aws']['ec2']['key_pair'],
 						   ingress_rules=cfg['aws']['ec2']['ingress_rules'], 
 						   userdata_script=cfg['aws']['ec2']['userdata_script']['script'])
 

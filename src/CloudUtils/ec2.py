@@ -1,6 +1,11 @@
 import boto3
+import paramiko
 import os
 import time
+from typing import List
+
+import paramiko.client
+from src.Utils.utils import Utils
 from src.CloudUtils.aws import AWSHelper
 from src.CloudUtils.login import AWSCredentialManager
 
@@ -159,6 +164,28 @@ class EC2Helper(AWSHelper):
             print(f"Error occurred while checking instance existence: {e}")
             return False
         
+    def check_instance_running(self, instance_name):
+        try:
+            # Describe instances to check if instance with specified name exists
+            response = self.ec2.describe_instances(
+                Filters=[
+                    {'Name': 'tag:Name', 'Values': [instance_name]},
+                    {'Name': 'instance-state-name', 'Values': ['running']}
+                ]
+            )
+            
+            if response['Reservations']:
+                print(f"Instance with name '{instance_name}' already exists.")
+                return True
+            else:
+                print(f"No running instance with name '{instance_name}' found.")
+                return False
+        
+        except Exception as e:
+            print(f"Error occurred while checking instance existence: {e}")
+            return False
+        
+        
     def create_or_start_ec2_instance_with_userdata(self, instance_name, image_id, instance_type, key_name, userdata_script, security_group_ids:list):
         try:
             # Check if instance with specified name already exists
@@ -291,20 +318,7 @@ class EC2Helper(AWSHelper):
         - str or None: The name of the existing or newly created key pair,
                     or None if an error occurred.
         """
-        gitignore_path = os.path.join(self.working_directory, ".gitignore")
-        # Check if .gitignore file exists
-        if not os.path.exists(gitignore_path):
-            # Create .gitignore file if it doesn't exist
-            with open(gitignore_path, "w") as gitignore_file:
-                if f"{key_pair_name}" not in  gitignore_file.readlines():
-                    gitignore_file.write(f"{key_pair_name}/\n")
-                    print(f"Ignored :{key_pair_name}")
-                else:
-                    print(f"{key_pair_name} is already ignored.")
-        else:
-            # Append directory pattern to .gitignore file
-            with open(gitignore_path, "a") as gitignore_file:
-                gitignore_file.write(f"{key_pair_name}\n")
+        Utils.text_appender(f"{self.working_directory}/.gitignore", key_pair_name)
         try:
             response = self.ec2.describe_key_pairs(KeyNames=[key_pair_name])
     
@@ -403,3 +417,52 @@ class EC2Helper(AWSHelper):
         except Exception as e:
             print(f"Error occurred while verifying instance statuses: {e}")
             return False
+        
+    def describe_instance(self, instance_name):
+        try:
+            instance_id = self.get_instance_id_by_name(instance_name)
+            instance = self.ec2.describe_instances(InstanceIds=[instance_id])['Reservations'][0]['Instances'][0]
+            return instance
+        except Exception as e:
+            print(f"Excepation Raised in {self}:", e)
+            return False
+        
+    def get_private_ip(self, instance_name):
+        instance = self.describe_instance(instance_name)
+        return instance['PrivateIpAddress']
+    
+    def get_public_ip(self, instance_name):
+        instance = self.describe_instance(instance_name)
+        return instance['PublicIpAddress']
+    
+    def command_instance_with_ssh(self, instance_name, private_key_path, port, username, command):
+        public_ip = self.get_public_ip(instance_name)
+        ssh_client = paramiko.SSHClient()
+        try:
+            ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            private_key = paramiko.RSAKey.from_private_key_file(private_key_path)
+            ssh_client.connect(public_ip, port, username, pkey=private_key)
+            _, stdout, _ = ssh_client.exec_command(command)
+            # Read and print the output of the command
+            print(f"Command executed: {command}")
+            print("Output:")
+            for line in stdout.readlines():
+                print(line.strip())
+
+            # Close the SSH connection
+            ssh_client.close()
+            return True
+        except Exception as e:
+            print(f"Error sending command with ssh: {e}")
+            return False
+        
+    def command_multiple_instances_with_ssh(self, instance_names, private_key_path, port, username, command):
+        instance_status = [self.check_instance_running(instance_name) for instance_name in instance_names]
+        if all(instance_status):
+            for instance_name in instance_names:
+                self.command_instance_with_ssh(instance_name, private_key_path, port, username, command)
+            return True
+        else:
+            print("All listed instances are not in 'running' status.")
+        return False
+

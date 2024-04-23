@@ -73,10 +73,10 @@ class GeneralProcess:
 		self.ecr_helper.push_image(image_name, tag)
 		return True
 
-	def create_instance(self, image_id, instance_type, ingress_rules, userdata_script):
-		group_id1 = self.ec2_helper.create_security_group(group_name="aws_template_1", description='This group is created in aws template with boto3', ingress_rules=ingress_rules)
-		key_name = self.ec2_helper.check_or_create_key_pair('aws_template_key')
-		self.ec2_helper.create_or_start_ec2_instance_with_userdata(instance_name='Instance_1', image_id=image_id, instance_type=instance_type, key_name=key_name, userdata_script=userdata_script, security_group_ids=[group_id1])
+	def create_instance(self, instance_name, group_name, key_pair, image_id, instance_type, ingress_rules, userdata_script):
+		group_id1 = self.ec2_helper.create_security_group(group_name=group_name, description='This group is created in aws template with boto3', ingress_rules=ingress_rules)
+		key_name = self.ec2_helper.check_or_create_key_pair(key_pair_name=key_pair)
+		self.ec2_helper.create_or_start_ec2_instance_with_userdata(instance_name=instance_name, image_id=image_id, instance_type=instance_type, key_name=key_name, userdata_script=userdata_script, security_group_ids=[group_id1])
 
 	def stop_all_instances(self):
 		self.ec2_helper.stop_all_running_instances()
