@@ -57,10 +57,10 @@ class GeneralProcess:
 			return True
 		return False
 
-	def version_code(self):
+	def version_code(self, message=""):
 		if self.git_helper.needs_commit(['./src/', './configs/']):
 			self.git_helper.add(["."])
-			self.git_helper.commit("Code updated with {}".format(self.code_version))
+			self.git_helper.commit(message)
 			self.git_helper.version_code()
 			self.git_helper.push()
 			return True

@@ -12,7 +12,7 @@ from src.processes.setup_process import setup_general_process
 @hydra.main(config_name='config', config_path='../../configs', version_base=None)
 def main(cfg: DictConfig)->None:
 	processes = setup_general_process(cfg)
-	processes.version_code()
+	processes.version_code(cfg.code_update)
 
 
 if __name__=='__main__':
