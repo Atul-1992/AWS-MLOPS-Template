@@ -162,6 +162,7 @@ class GitHelper:
                 # Find the latest tag based on semantic versioning (assuming tags are in format '{prefix}X.Y.Z')
                 if not tags_list:
                     tags_list.append("0")
+                print("TAg list",tags_list)
                 latest_tag = max(tags_list)
                 print(f"latest tag: {latest_tag}")
                 return latest_tag
