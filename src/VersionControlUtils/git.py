@@ -140,7 +140,6 @@ class GitHelper:
     def version_code(self, tag_prefix='v'):
         # Retrieve the latest tag of the specified prefix to determine the next version number
         next_version = int(self.get_latest_tag(tag_prefix)) + 1
-        print(next_version)
 
         if next_version:
             # Tag the current commit with the next version number
@@ -156,15 +155,13 @@ class GitHelper:
         try:
             result = subprocess.run(['git', "-C", self.repo_dir, 'tag', '--list', f'{tag_prefix}*'], capture_output=True, text=True)
             tags_list = result.stdout.strip().split('\n')
-            print(tags_list)
+
             if tags_list:
-                tags_list = [self.parse_version(tag, tag_prefix=tag_prefix) for tag in tags_list if self.parse_version(tag, tag_prefix=tag_prefix) is not None]
+                tags_list = [int(self.parse_version(tag, tag_prefix=tag_prefix)) for tag in tags_list if self.parse_version(tag, tag_prefix=tag_prefix) is not None]
                 # Find the latest tag based on semantic versioning (assuming tags are in format '{prefix}X.Y.Z')
                 if not tags_list:
                     tags_list.append("0")
-                print("TAg list",tags_list)
                 latest_tag = max(tags_list)
-                print(f"latest tag: {latest_tag}")
                 return latest_tag
             else:
                 return None
@@ -174,8 +171,6 @@ class GitHelper:
 
     def parse_version(self, version, tag_prefix):
         tag = version[len(tag_prefix):]
-        print(tag)
-        print(f"{tag} is: {tag.isdigit()}")
         if tag.isdigit():
             return tag
 
