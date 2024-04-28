@@ -173,6 +173,8 @@ class GitHelper:
 
     def parse_version(self, version, tag_prefix):
         tag = version[len(tag_prefix):]
+        print(tag)
+        print(f"{tag} is: {tag.isdigit()}")
         if tag.isdigit():
             return tag
 
