@@ -104,6 +104,11 @@ Refer to this guide for understanding the structure and purpose of this project 
    - Alternatively we can set our configuration pythonically as done in `config_schemas` folder. For simplicity and to keep code relevent with respect to warnings, I choose to change schemas `config_name` to `config_schema_node`. If we keep the same name as our main `config`.yaml it will validate schema of our `configs` directory. This feature is expected to depreciate due to complexity caused by it, therefore I am keeping my schema and configs different.
    - For more information on it, please visit -> [Hydra Docs](https://hydra.cc/docs/intro/)
 
+6. **MLFLOW Config:**
+   First make sure that path exists for the `backend store` and `artifact store`, you provided in your server.
+   Second you need to be sure that current_user has read, write and execute permission for this project. Or Else No artifact or track records will be saved programmatically.
+   I have added `remove_permission_issues.sh` as reference to solve this issue. Also added a sample local server, which will work exactly like remote server, store and pass artifacts and logs by itself, instead of using local environment for that (however that seems to be costlier than directly, anyways we can change that will change of line of code.).
+
 ## <a id="cli-how-to-use-this-template">CLI (How to use this template?):</a>
 This part is our objective to create. We can alway add more cli command to create more processes as per our requirements.
 

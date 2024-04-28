@@ -1,14 +1,13 @@
 # ENV_FILE := env_files/aws.env
 
 # include $(ENV_FILE)
-# export
 
 # export_aws_secrets:
 # 	@echo "Exporting AWS credentials..."
-# 	@set AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID); \
-# 	@set AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY); \
-# 	@set AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION); \
-# 	@echo "AWS credentials exported successfully.
+# 	@export AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID); \
+# 	export AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY); \
+# 	export AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION); \
+# 	echo "AWS credentials exported successfully."
 
 init:
 	python ./src/execute/init.py
@@ -33,3 +32,11 @@ check_configs:
 
 ssh_instance:
 	ssh -i my-key-pair.pem ec2-user@<public_ip>
+
+start_local_server:
+	mlflow server --backend-store-uri \
+	sqlite:///$(PWD)/demo_sqlite_db/mlflow.db \
+	--artifacts-destination file:$(PWD)/demo_aritifact_store/ \
+	--host localhost \
+	--port 5000
+

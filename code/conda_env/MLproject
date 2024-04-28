@@ -1,0 +1,8 @@
+name: stockpred
+conda_env: environment.yml
+
+entry_points:
+  main:
+    command: "python ./../train.py"
+mlflow:
+  tracking_uri: "http://127.0.0.1:5000"

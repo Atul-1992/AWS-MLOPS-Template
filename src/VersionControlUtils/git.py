@@ -140,6 +140,7 @@ class GitHelper:
     def version_code(self, tag_prefix='v'):
         # Retrieve the latest tag of the specified prefix to determine the next version number
         next_version = int(self.get_latest_tag(tag_prefix)) + 1
+        print(next_version)
 
         if next_version:
             # Tag the current commit with the next version number
@@ -162,6 +163,7 @@ class GitHelper:
                 if not tags_list:
                     tags_list.append("0")
                 latest_tag = max(tags_list)
+                print(f"latest tag: {latest_tag}")
                 return latest_tag
             else:
                 return None
