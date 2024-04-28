@@ -156,7 +156,7 @@ class GitHelper:
         try:
             result = subprocess.run(['git', "-C", self.repo_dir, 'tag', '--list', f'{tag_prefix}*'], capture_output=True, text=True)
             tags_list = result.stdout.strip().split('\n')
-
+            print(tags_list)
             if tags_list:
                 tags_list = [self.parse_version(tag, tag_prefix=tag_prefix) for tag in tags_list if self.parse_version(tag, tag_prefix=tag_prefix) is not None]
                 # Find the latest tag based on semantic versioning (assuming tags are in format '{prefix}X.Y.Z')
