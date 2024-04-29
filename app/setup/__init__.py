@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 import os
-from projects.project_1 import project_1_bp
+from app.projects.project_1 import project_1_bp
 
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))

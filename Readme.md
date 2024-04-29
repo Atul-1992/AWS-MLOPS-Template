@@ -5,10 +5,11 @@ This project is created in very modular structure so that we can add and remove 
 
 **Documentation Structure:**
 
-- [Project Overview](#project-overview)
-- [Template Structure](#template-structure)
-- [Project Setup](#project-setup)
-- [CLI (How to use this template?)](#cli-how-to-use-this-template)
+- [AWS MLOPS Project Template](#aws-mlops-project-template)
+  - [Project Overview](#project-overview)
+  - [Template Structure](#template-structure)
+  - [Project Setup](#project-setup)
+  - [CLI (How to use this template?):](#cli-how-to-use-this-template)
 
 ## <a id="project-overview">Project Overview</a>
 
@@ -128,5 +129,12 @@ This part is our objective to create. We can alway add more cli command to creat
    It will create new instance as per our configuration and userdata or start old one with new userdata if instance with the same name already exists.It will also create a `key_pair` to ssh into instance if key_pair does not exits and `.gitignore` it. If you have lost old key_pair, Kindly download it manually and `.gitignore` it to make this code work.
 
    8. `make stop_all_instances`: Will stop all containers in your containers in your aws account, so use it carefully. You can always add or alter code to match your requirements.
+   
+   9. Other Tools:
+      1.  `make write_env_files`: write `requirements.txt` files for `app`, `src` and `code` folder iteratively.
+      2.  `make start_local_server`: start local mlflow server which determine backend store and artifact location. This is for local test only.
+      3.  `make lint`: lint our code in `code`, `src` and `app` directory and returns errors, only.
+      4.  `make score_lint`: returns pylint score
+      5.  `make black_format`: format our code with black formatter in `code`, `src` and `app` folder.
 
 **Note:** Commands like `run_on_ec2` and `stop_all_instances` may take time to respond, as they are configured to wait till instances are in `running` or all instances are in `stopped` state. Still It is always good idea to check these on your aws account manually which does not take much effort. Atleast always check status of your command.

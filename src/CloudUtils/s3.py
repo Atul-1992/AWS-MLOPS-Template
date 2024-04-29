@@ -31,7 +31,7 @@ class S3Helper(AWSHelper):
                     "Principal": "*",
                     "Action": "s3:ListBucketVersions",
                     "Resource": f"arn:aws:s3:::{bucket_name}/*",
-                }
+                },
             ]
         }
 

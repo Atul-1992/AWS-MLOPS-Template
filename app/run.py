@@ -1,10 +1,10 @@
 from flask import render_template, request, url_for, redirect, flash
 from flask_login import login_user, login_required, logout_user
-from setup.forms.login import LoginForm
-from setup.forms.register import RegisterForm
-from projects.project_1 import project_1_bp
-from setup import app, db
-from setup.models.user import User
+from app.setup.forms.login import LoginForm
+from app.setup.forms.register import RegisterForm
+from app.projects.project_1 import project_1_bp
+from app.setup import app, db
+from app.setup.models.user import User
 
 
 @app.route("/")
