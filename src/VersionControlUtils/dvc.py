@@ -1,27 +1,34 @@
 import subprocess
 
+
 class DVCHelper:
     def __init__(self, project_dir, data_dir, remote_name, remote_url):
         self.project_dir = project_dir
         self.data_version = 0
         self.data_dir = data_dir
         self.remote_name = remote_name
-    
+
         if not self.is_dvc_repo():
             self.init()
         self.add_remote(remote_name, remote_url)
-        
+
     def is_dvc_repo(self):
         """
         Check if the project directory is a DVC repository.
         """
         command = ["dvc", "status"]
         try:
-            subprocess.run(command, cwd=self.project_dir, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.run(
+                command,
+                cwd=self.project_dir,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
             return True
         except subprocess.CalledProcessError:
             return False
-        
+
     def init(self):
         """
         Initialize a new DVC repository.
@@ -48,7 +55,7 @@ class DVCHelper:
         except subprocess.CalledProcessError as e:
             print(f"Error adding data to DVC repository: {e}")
             return False
-    
+
     def add_remote(self, remote_name, remote_url):
         """
         Add a remote to the DVC repository.
@@ -61,7 +68,7 @@ class DVCHelper:
         except subprocess.CalledProcessError as e:
             print(f"Error adding remote to DVC repository: {e}")
             return False
-    
+
     def push(self):
         """
         Push data tracked by DVC to the configured remote storage.
@@ -87,16 +94,26 @@ class DVCHelper:
         except subprocess.CalledProcessError as e:
             print(f"Error pulling data from DVC remote: {e}")
             return False
-        
+
     def needs_update(self):
         """
         Check if the dataset tracked by DVC needs to be updated.
         """
         command = ["dvc", "status", self.data_dir]
         try:
-            result = subprocess.run(command, cwd=self.project_dir, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            result = subprocess.run(
+                command,
+                cwd=self.project_dir,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
             output = result.stdout.decode().strip()
-            if "changed_files: 0" in output and "added_files: 0" in output and "deleted_files: 0" in output:
+            if (
+                "changed_files: 0" in output
+                and "added_files: 0" in output
+                and "deleted_files: 0" in output
+            ):
                 print("Dataset is up to date.")
                 return False
             else:
@@ -120,7 +137,13 @@ class DVCHelper:
         try:
             # Execute 'dvc remote list' command to get the list of remotes
             command = ["dvc", "remote", "list"]
-            result = subprocess.run(command, cwd=self.project_dir, capture_output=True, text=True, check=True)
+            result = subprocess.run(
+                command,
+                cwd=self.project_dir,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
 
             # Parse the output to check if the specified remote exists
             remotes = result.stdout.strip().split()

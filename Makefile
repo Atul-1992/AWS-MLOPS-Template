@@ -40,3 +40,13 @@ start_local_server:
 	--host localhost \
 	--port 5000
 
+write_env_files:
+	pipreqs --savepath ./src/requirements.txt ./src/;
+	pipreqs --savepath ./code/requirements.txt ./code/;
+	pipreqs --savepath ./app/requirements.txt ./app/
+
+black_format:
+	black ./src/ ./code/ ./app/
+
+lint:
+	pylint ./src/ ./code/ ./app/ | tail -n 2 | head -n 1

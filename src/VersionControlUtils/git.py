@@ -1,6 +1,7 @@
 import os
 import subprocess
 
+
 class GitHelper:
     def __init__(self, repo_dir, branch, remote_name=None, remote_url=None):
         self.repo_dir = os.path.abspath(repo_dir)
@@ -37,28 +38,42 @@ class GitHelper:
         file_paths = [os.path.abspath(file_path) for file_path in file_paths]
         subprocess.run(["git", "-C", self.repo_dir, "add"] + file_paths)
 
-    def commit(self, commit_message=''):
+    def commit(self, commit_message=""):
         """
         Commit changes in a local Git repository.
         """
-        if self.needs_commit(['.']):
+        if self.needs_commit(["."]):
             subprocess.run(["git", "-C", self.repo_dir, "commit", "-m", commit_message])
-            print(f"Committed changes to repository '{self.repo_dir}' with message: {commit_message}")
+            print(
+                f"Committed changes to repository '{self.repo_dir}' with message: {commit_message}"
+            )
             return True
         else:
             print(f"No changes to commit in repository '{self.repo_dir}'")
             return False
 
-    def push(self, remote_name='origin'):
+    def push(self, remote_name="origin"):
         """
         Push commits to the specified branch of the remote repository.
         """
         if not self.remote_url:
             print(f"No remote URL found for remote '{remote_name}'")
             return False
-        subprocess.run(["git", "-C", self.repo_dir, "push", "--set-upstream", remote_name, self.branch])
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                self.repo_dir,
+                "push",
+                "--set-upstream",
+                remote_name,
+                self.branch,
+            ]
+        )
         subprocess.run(["git", "-C", self.repo_dir, "push", "--tags"])
-        print(f"Pushed commits to {remote_name}/{self.branch} from repository: {self.repo_dir}")
+        print(
+            f"Pushed commits to {remote_name}/{self.branch} from repository: {self.repo_dir}"
+        )
         return True
 
     def create_remote(self):
@@ -68,8 +83,20 @@ class GitHelper:
         if not self.remote_url:
             print("Remote URL not provided.")
             return False
-        subprocess.run(["git", "-C", self.repo_dir, "remote", "add", self.remote_name, self.remote_url])
-        print(f"Successfully created remote '{self.remote_name}' ({self.remote_url}) in repository: {self.repo_dir}")
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                self.repo_dir,
+                "remote",
+                "add",
+                self.remote_name,
+                self.remote_url,
+            ]
+        )
+        print(
+            f"Successfully created remote '{self.remote_name}' ({self.remote_url}) in repository: {self.repo_dir}"
+        )
         return True
 
     def needs_commit(self, directories):
@@ -84,13 +111,13 @@ class GitHelper:
         """
         # Construct the git status command with pathspec options for specified directories
         git_command = ["git", "-C", self.repo_dir, "status", "--porcelain"]
-        
+
         for directory in directories:
-            git_command.extend(['--', directory])
+            git_command.extend(["--", directory])
 
         # Run git status command to check for changes in specified directories
         result = subprocess.run(git_command, capture_output=True, text=True)
-        
+
         # Check if there is any output from git status (indicating changes)
         return bool(result.stdout.strip())
 
@@ -98,7 +125,10 @@ class GitHelper:
         """
         Get the URL of a specified remote in the local Git repository.
         """
-        result = subprocess.run(["git", "-C", self.repo_dir, "remote", "get-url", remote_name], capture_output=True)
+        result = subprocess.run(
+            ["git", "-C", self.repo_dir, "remote", "get-url", remote_name],
+            capture_output=True,
+        )
         return result.stdout.strip().decode("utf-8")
 
     # def version_code(self):
@@ -123,7 +153,9 @@ class GitHelper:
         """
         Check if the local Git repository needs to be updated.
         """
-        result = subprocess.run(["git", "-C", self.repo_dir, "status", "--porcelain"], capture_output=True)
+        result = subprocess.run(
+            ["git", "-C", self.repo_dir, "status", "--porcelain"], capture_output=True
+        )
         return bool(result.stdout.strip())
 
     def add_to_gitignore(self, directory_name):
@@ -134,10 +166,12 @@ class GitHelper:
         with open(gitignore_path, "a") as gitignore_file:
             gitignore_file.write(f"\n{directory_name}\n")
         subprocess.run(["git", "-C", self.repo_dir, "add", gitignore_path])
-        subprocess.run(["git", "-C", self.repo_dir, "commit", "-m", f"Ignore {directory_name}"])
+        subprocess.run(
+            ["git", "-C", self.repo_dir, "commit", "-m", f"Ignore {directory_name}"]
+        )
         return True
 
-    def version_code(self, tag_prefix='v'):
+    def version_code(self, tag_prefix="v"):
         # Retrieve the latest tag of the specified prefix to determine the next version number
         next_version = int(self.get_latest_tag(tag_prefix)) + 1
 
@@ -153,11 +187,19 @@ class GitHelper:
     def get_latest_tag(self, tag_prefix):
         # Get the latest tag with the specified prefix in the repository
         try:
-            result = subprocess.run(['git', "-C", self.repo_dir, 'tag', '--list', f'{tag_prefix}*'], capture_output=True, text=True)
-            tags_list = result.stdout.strip().split('\n')
+            result = subprocess.run(
+                ["git", "-C", self.repo_dir, "tag", "--list", f"{tag_prefix}*"],
+                capture_output=True,
+                text=True,
+            )
+            tags_list = result.stdout.strip().split("\n")
 
             if tags_list:
-                tags_list = [int(self.parse_version(tag, tag_prefix=tag_prefix)) for tag in tags_list if self.parse_version(tag, tag_prefix=tag_prefix) is not None]
+                tags_list = [
+                    int(self.parse_version(tag, tag_prefix=tag_prefix))
+                    for tag in tags_list
+                    if self.parse_version(tag, tag_prefix=tag_prefix) is not None
+                ]
                 # Find the latest tag based on semantic versioning (assuming tags are in format '{prefix}X.Y.Z')
                 if not tags_list:
                     tags_list.append("0")
@@ -170,27 +212,27 @@ class GitHelper:
             return None
 
     def parse_version(self, version, tag_prefix):
-        tag = version[len(tag_prefix):]
+        tag = version[len(tag_prefix) :]
         if tag.isdigit():
             return tag
 
     def tag_commit(self, tag_name):
         # Tag the current commit with the specified tag name
         try:
-            subprocess.run(['git', "-C", self.repo_dir, 'tag', tag_name])
+            subprocess.run(["git", "-C", self.repo_dir, "tag", tag_name])
         except subprocess.CalledProcessError as e:
             print(f"Error: {e}")
-            
+
     def create_branch(self, branch_name):
         try:
-            subprocess.run(['git', "-C", self.repo_dir, 'branch', branch_name])
+            subprocess.run(["git", "-C", self.repo_dir, "branch", branch_name])
             print(f"Created branch '{branch_name}'")
         except subprocess.CalledProcessError as e:
             print(f"Error creating branch: {e}")
 
     def switch_to_branch(self, branch_name):
         try:
-            subprocess.run(['git', "-C", self.repo_dir, 'checkout', branch_name])
+            subprocess.run(["git", "-C", self.repo_dir, "checkout", branch_name])
             self.branch = branch_name
             print(f"Switched to branch '{branch_name}'")
         except subprocess.CalledProcessError as e:
@@ -203,14 +245,16 @@ class GitHelper:
     def list_branches(self):
         try:
             # Run 'git branch' command to list all branches
-            result = subprocess.run(['git', "-C", self.repo_dir, 'branch'], capture_output=True, text=True)
-            
+            result = subprocess.run(
+                ["git", "-C", self.repo_dir, "branch"], capture_output=True, text=True
+            )
+
             # Get the output from the command
             output = result.stdout.strip()
-            
+
             # Split the output into lines to extract branch names
-            branches = [line.lstrip('* ').strip() for line in output.split('\n')]
-            
+            branches = [line.lstrip("* ").strip() for line in output.split("\n")]
+
             # Print the list of branches
             if branches:
                 print("List of branches:")
@@ -220,15 +264,15 @@ class GitHelper:
                 print("No branches found.")
         except subprocess.CalledProcessError as e:
             print(f"Error listing branches: {e}")
-        
-    def latest_branch_tag(self, prefix='ds-'):
+
+    def latest_branch_tag(self, prefix="ds-"):
         branch_names = self.list_branches()
         data_branches = [branch for branch in branch_names if prefix in branch]
-        return max([int(branch[len(prefix):]) for branch in data_branches])
-    
+        return max([int(branch[len(prefix) :]) for branch in data_branches])
+
     def create_new_ds_branch(self):
         latest_tag = self.latest_branch_tag() + 1
-        self.create_and_switch_to_branch(f'ds-{latest_tag}')
-    
+        self.create_and_switch_to_branch(f"ds-{latest_tag}")
+
     def version_dataset(self):
         self.create_and_switch_to_branch()
