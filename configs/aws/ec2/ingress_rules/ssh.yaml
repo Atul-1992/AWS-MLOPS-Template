@@ -1,3 +1,4 @@
+# configs/aws/ingress_rules/ssh.yaml
 IpProtocol: tcp
 FromPort: 22
 ToPort: 22

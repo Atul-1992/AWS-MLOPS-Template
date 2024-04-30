@@ -1,0 +1,4 @@
+docker_folder: '.'
+dockerfile_name: 'Dockerfile.app'
+image_name: 'app_image'
+tag: 'v01'

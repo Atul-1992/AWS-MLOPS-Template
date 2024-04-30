@@ -21,6 +21,11 @@ def main(cfg: DictConfig) -> None:
         key_pair=cfg["aws"]["ec2"]["key_pair"],
         ingress_rules=cfg["aws"]["ec2"]["ingress_rules"],
         userdata_script=cfg["aws"]["ec2"]["userdata_script"]["script"],
+        role_name=cfg['aws']['iam']['trainer']['role_name'],
+        assume_role_policy_document=cfg['aws']['iam']['trainer']['assume_policy_document'],
+        policy_names=cfg['aws']['iam']['trainer']['policy_names'],
+        instance_profile_name=cfg['aws']['iam']['trainer']['instance_profile_name'],
+        environment_variables=cfg['aws']['iam']['trainer']['environment_variables']
     )
 
 

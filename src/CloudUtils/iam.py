@@ -1,22 +1,14 @@
 import boto3
 from src.CloudUtils.aws import AWSHelper
-
+from src.CloudUtils.login import AWSCredentialManager
 
 class IAMHelper(AWSHelper):
     def __init__(self, cwd) -> None:
         super().__init__(cwd)
+        self.session = AWSCredentialManager().get_aws_session()
         self.iam = boto3.client("iam")
 
     def check_role_exists(self, role_name):
-        """
-        Check if the given IAM role exists.
-
-        Args:
-        - role_name (str): The name of the IAM role to check.
-
-        Returns:
-        - bool: True if the role exists, False otherwise.
-        """
         try:
             self.iam.get_role(RoleName=role_name)
             return True
@@ -24,50 +16,29 @@ class IAMHelper(AWSHelper):
             return False
 
     def create_role(self, role_name, assume_role_policy_document):
-        """
-        Create an IAM role with the given name and assume role policy document.
-
-        Args:
-        - role_name (str): The name of the IAM role to create.
-        - assume_role_policy_document (dict): The assume role policy document for the IAM role.
-
-        Returns:
-        - str: The ARN of the created IAM role.
-        """
         response = self.iam.create_role(
             RoleName=role_name, AssumeRolePolicyDocument=assume_role_policy_document
         )
         return response["Role"]["Arn"]
 
     def attach_policies_to_role(self, role_name, policy_arns):
-        """
-        Attach policies to the given IAM role.
-
-        Args:
-        - role_name (str): The name of the IAM role to attach policies to.
-        - policy_arns (list): List of ARNs of the policies to attach.
-
-        Returns:
-        - None
-        """
         for policy_arn in policy_arns:
-            self.iam.attach_role_policy(RoleName=role_name, PolicyArn=policy_arn)
+            try:
+                self.iam.attach_role_policy(RoleName=role_name, PolicyArn=policy_arn)
+            except self.iam.exceptions.NoSuchEntityException:
+                print(f"Policy '{policy_arn}' not found.")
+                
+    def get_policy_arn(self, policy_name):
+        paginator = self.iam.get_paginator('list_policies')
+        for page in paginator.paginate():
+            for policy in page['Policies']:
+                if policy['PolicyName'] == policy_name:
+                    return policy['Arn']
+        return None
 
     def create_or_get_role(
-        self, role_name, assume_role_policy_document, policy_arns=None
+        self, role_name, assume_role_policy_document, policy_names=None
     ):
-        """
-        Check if the IAM role exists, if not create it.
-        Attach policies to the role if provided.
-
-        Args:
-        - role_name (str): The name of the IAM role to create or get.
-        - assume_role_policy_document (dict): The assume role policy document for the IAM role.
-        - policy_arns (list): List of ARNs of the policies to attach. Default is None.
-
-        Returns:
-        - str: The ARN of the created or existing IAM role.
-        """
         if self.check_role_exists(role_name):
             print(f"IAM role '{role_name}' already exists.")
             return self.get_role_arn(role_name)
@@ -75,41 +46,55 @@ class IAMHelper(AWSHelper):
             print(f"IAM role '{role_name}' does not exist. Creating...")
             role_arn = self.create_role(role_name, assume_role_policy_document)
             print(f"IAM role '{role_name}' created with ARN: {role_arn}")
-            if policy_arns:
+            if policy_names:
+                policy_arns = [self.get_policy_arn(policy_name) for policy_name in policy_names]
                 self.attach_policies_to_role(role_name, policy_arns)
                 print("Policies attached to the role.")
             return role_arn
 
     def get_role_arn(self, role_name):
-        """
-        Get the ARN of an existing IAM role.
-
-        Args:
-        - role_name (str): The name of the IAM role.
-
-        Returns:
-        - str: The ARN of the IAM role.
-        """
         response = self.iam.get_role(RoleName=role_name)
         return response["Role"]["Arn"]
+    
+    def create_instance_profile(self, instance_profile_name):
+        try:
+            instance_profile_response = self.iam.create_instance_profile(
+                InstanceProfileName=instance_profile_name
+            )
+            instance_profile_arn = instance_profile_response['InstanceProfile']['Arn']
+            print(f"IAM instance profile '{instance_profile_name}' created with ARN: {instance_profile_arn}")
+            return instance_profile_arn
+        except self.iam.exceptions.EntityAlreadyExistsException:
+            print(f"IAM instance profile '{instance_profile_name}' already exists.")
+            instance_profile_response = self.iam.get_instance_profile(InstanceProfileName=instance_profile_name)
+            instance_profile_arn = instance_profile_response['InstanceProfile']['Arn']
+            print(f"IAM instance profile '{instance_profile_name}' ARN: {instance_profile_arn}")
+            return instance_profile_arn
+        except Exception as e:
+            print(f"Error creating IAM instance profile '{instance_profile_name}': {e}")
+            return None
 
+    def add_roles_to_instance_profile(self, instance_profile_name, role_names):
+        try:
+            # Get the instance profile ARN
+            instance_profile_response = self.iam.get_instance_profile(InstanceProfileName=instance_profile_name)
+            # instance_profile_arn = instance_profile_response['InstanceProfile']['Arn']
 
-# Example usage:
-# if __name__ == "__main__":
-#     role_name = "MyCustomRole"
-#     assume_role_policy_document = {
-#         "Version": "2012-10-17",
-#         "Statement": [
-#             {
-#                 "Effect": "Allow",
-#                 "Principal": {
-#                     "Service": "ec2.amazonaws.com"
-#                 },
-#                 "Action": "sts:AssumeRole"
-#             }
-#         ]
-#     }
-#     policy_arns = [
-#         "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess",
-#         "arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess"
-#     ]
+            # Add roles to the instance profile
+            for role_name in role_names:
+                try:
+                    self.iam.add_role_to_instance_profile(
+                        InstanceProfileName=instance_profile_name,
+                        RoleName=role_name
+                    )
+                    print(f"IAM role '{role_name}' added to instance profile '{instance_profile_name}'.")
+                except self.iam.exceptions.EntityAlreadyExistsException:
+                    print(f"IAM role '{role_name}' is already associated with instance profile '{instance_profile_name}'.")
+                except Exception as e:
+                    print(f"Error adding IAM role '{role_name}' to instance profile '{instance_profile_name}': {e}")
+            return instance_profile_response['InstanceProfile']['Arn']
+        except self.iam.exceptions.NoSuchEntityException:
+            print(f"IAM instance profile '{instance_profile_name}' not found.")
+        except Exception as e:
+            print(f"Error getting IAM instance profile '{instance_profile_name}': {e}")
+

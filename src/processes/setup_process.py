@@ -1,5 +1,6 @@
 from src.CloudUtils.ec2 import EC2Helper
 from src.CloudUtils.ecr import ECRHelper
+from src.CloudUtils.iam import IAMHelper
 
 # from src.CloudUtils.aws_config import AWSConfig
 from src.CloudUtils.s3 import S3Helper
@@ -43,6 +44,7 @@ class GeneralProcess:
         self.ec2_helper = EC2Helper(self.project_dir)
         self.s3_helper = S3Helper(self.project_dir)
         self.ecr_helper = ECRHelper(self.project_dir)
+        self.iam_helper = IAMHelper(self.project_dir)
         self.container_helper = DockerHelper(self.project_dir, docker_folder)
 
     def initialize_project(self):
@@ -94,8 +96,13 @@ class GeneralProcess:
         key_pair,
         image_id,
         instance_type,
+        role_name,
+        assume_role_policy_document,
+        policy_names,
+        instance_profile_name,
         ingress_rules,
         userdata_script,
+        environment_variables=None
     ):
         group_id1 = self.ec2_helper.create_security_group(
             group_name=group_name,
@@ -103,6 +110,12 @@ class GeneralProcess:
             ingress_rules=ingress_rules,
         )
         key_name = self.ec2_helper.check_or_create_key_pair(key_pair_name=key_pair)
+        self.iam_helper.create_or_get_role(role_name,
+                                           assume_role_policy_document=assume_role_policy_document,
+                                           policy_names=policy_names)
+        self.iam_helper.create_instance_profile(instance_profile_name)
+        instance_profile_arn = self.iam_helper.add_roles_to_instance_profile(instance_profile_name=instance_profile_name,
+                                                      role_names=[role_name])
         self.ec2_helper.create_or_start_ec2_instance_with_userdata(
             instance_name=instance_name,
             image_id=image_id,
@@ -110,6 +123,9 @@ class GeneralProcess:
             key_name=key_name,
             userdata_script=userdata_script,
             security_group_ids=[group_id1],
+            instance_profile_arn=instance_profile_arn,
+            environment_variables=environment_variables,
+            
         )
 
     def stop_all_instances(self):

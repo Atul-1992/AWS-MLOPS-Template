@@ -199,6 +199,8 @@ class EC2Helper(AWSHelper):
         key_name,
         userdata_script,
         security_group_ids: list,
+        instance_profile_arn=None,
+        environment_variables=None
     ):
         try:
             # Check if instance with specified name already exists
@@ -206,54 +208,63 @@ class EC2Helper(AWSHelper):
                 # Get the instance ID
                 instance_id = self.get_instance_id_by_name(instance_name)
                 if instance_id:
-                    # Stop the instance
-                    self.ec2.stop_instances(InstanceIds=[instance_id])
-                    # Wait until the instance is stopped
-                    waiter = self.ec2.get_waiter("instance_stopped")
-                    waiter.wait(InstanceIds=[instance_id])
-                    # Modify user data of the instance
+                    # Modify security groups of the instance
                     self.ec2.modify_instance_attribute(
                         InstanceId=instance_id, Groups=security_group_ids
                     )
+                    # Modify user data of the instance
                     self.ec2.modify_instance_attribute(
                         InstanceId=instance_id, UserData={"Value": userdata_script}
                     )
-                    # Start the instance
-                    self.ec2.start_instances(InstanceIds=[instance_id])
-                    waiter_running = self.ec2.get_waiter("instance_status_ok")
-                    waiter_running.wait(InstanceIds=[instance_id])
                     print(
-                        f"EC2 instance '{instance_name}' with ID '{instance_id}' started with new user data."
+                        f"EC2 instance '{instance_name}' with ID '{instance_id}' updated with new user data and security groups."
                     )
+                    self.ec2.start_instances(InstanceIds=[instance_id])
+                    print(f"Starting EC2 instance with ID '{instance_id}'...")
+            
+                    # Wait until the instance is running
+                    self.ec2.get_waiter('instance_running').wait(InstanceIds=[instance_id])
+                    print(f"EC2 instance with ID '{instance_id}' started successfully.")
                     return instance_id
             else:
+                # Append environment variables to the userdata script
+                if environment_variables:
+                    for key, value in environment_variables.items():
+                        userdata_script += f"export {key}='{value}'\n"
+
                 # Create a new EC2 instance with user data (userdata_script)
-                response = self.ec2.run_instances(
-                    ImageId=image_id,
-                    InstanceType=instance_type,
-                    KeyName=key_name,
-                    SecurityGroupIds=security_group_ids,
-                    MinCount=1,
-                    MaxCount=1,
-                    UserData=userdata_script,
-                    TagSpecifications=[
+                run_instance_params = {
+                    "ImageId": image_id,
+                    "InstanceType": instance_type,
+                    "KeyName": key_name,
+                    "SecurityGroupIds": security_group_ids,
+                    "MinCount": 1,
+                    "MaxCount": 1,
+                    "UserData": userdata_script,
+                    "TagSpecifications": [
                         {
                             "ResourceType": "instance",
                             "Tags": [{"Key": "Name", "Value": instance_name}],
                         }
                     ],
-                )
+                }
+                if instance_profile_arn:
+                    run_instance_params["IamInstanceProfile"] = {"Arn": instance_profile_arn}
+
+                response = self.ec2.run_instances(**run_instance_params)
                 instance_id = response["Instances"][0]["InstanceId"]
-                waiter_running = self.ec2.get_waiter("instance_status_ok")
-                waiter_running.wait(InstanceIds=[instance_id])
                 print(
                     f"EC2 instance '{instance_name}' with ID '{instance_id}' created with user data."
                 )
                 return instance_id
 
+            # If the instance already exists, return its ID
+            return self.get_instance_id_by_name(instance_name)
+
         except Exception as e:
-            print(f"Error occurred while creating or starting EC2 instance: {e}")
+            print(f"Error creating or starting EC2 instance: {e}")
             return None
+
 
     def get_instance_id_by_name(self, instance_name):
         try:
@@ -332,31 +343,30 @@ class EC2Helper(AWSHelper):
         - str or None: The name of the existing or newly created key pair,
                     or None if an error occurred.
         """
-        Utils.text_appender(f"{self.working_directory}/.gitignore", key_pair_name)
         try:
             response = self.ec2.describe_key_pairs(KeyNames=[key_pair_name])
-
+            # Key pair already exists
             if response["KeyPairs"]:
-                # Key pair already exists
                 print(f"Key pair '{key_pair_name}' already exists.")
                 return key_pair_name
-        except:
-            # Key pair does not exist, create a new one
-            print(
-                f"Key pair '{key_pair_name}' does not exist. Creating a new key pair..."
-            )
-
-            # Create the new key pair
-            response = self.ec2.create_key_pair(KeyName=key_pair_name)
-            try:
-                # Save the private key to a file (optional)
-                with open(f"{key_pair_name}.pem", "w") as f:
-                    f.write(response["KeyMaterial"])
-                print(f"New key pair '{key_pair_name}' created.")
-                return key_pair_name
-            except Exception as e:
-                print(f"New Key could not be created!: {e}")
+        except self.ec2.exceptions.ClientError as e:
+            error_code = e.response["Error"]["Code"]
+            if error_code != "InvalidKeyPair.NotFound":
+                print(f"Error checking key pair: {e}")
                 return None
+        
+        try:
+            # Create the new key pair
+            Utils.text_appender(f"{self.working_directory}/.gitignore", key_pair_name)
+            response = self.ec2.create_key_pair(KeyName=key_pair_name)
+            # Save the private key to a file (optional)
+            with open(os.path.join(self.working_directory, f"{key_pair_name}.pem"), "w", encoding='utf-8') as f:
+                f.write(response["KeyMaterial"])
+            print(f"New key pair '{key_pair_name}' created.")
+            return key_pair_name
+        except Exception as e:
+            print(f"New Key could not be created!: {e}")
+            return None
 
     def stop_all_running_instances(self):
         """
@@ -452,6 +462,9 @@ class EC2Helper(AWSHelper):
         return instance["PrivateIpAddress"]
 
     def get_public_ip(self, instance_name):
+        if not self.check_instance_running(instance_name=instance_name):
+            print(f"Instance {instance_name} is not running.")
+            return False
         instance = self.describe_instance(instance_name)
         return instance["PublicIpAddress"]
 
@@ -494,3 +507,24 @@ class EC2Helper(AWSHelper):
         else:
             print("All listed instances are not in 'running' status.")
         return False
+
+    def assign_instance_profile_to_ec2_instance(self, instance_id, instance_profile_arn):
+        try:
+            # Assign the instance profile to the EC2 instance
+            self.ec2.associate_iam_instance_profile(
+                IamInstanceProfile={
+                    'Arn': instance_profile_arn
+                },
+                InstanceId=instance_id
+            )
+            print(f"IAM instance profile '{instance_profile_arn}' assigned to EC2 instance '{instance_id}'.")
+        except self.iam.exceptions.NoSuchEntityException:
+            print(f"IAM instance profile '{instance_profile_arn}' not found.")
+        except self.ec2.exceptions.ClientError as e:
+            error_code = e.response['Error']['Code']
+            if error_code == 'InvalidParameterValue':
+                print(f"Invalid parameter value. Check if the instance ID '{instance_id}' is correct.")
+            else:
+                print(f"Error assigning IAM instance profile '{instance_profile_arn}' to EC2 instance '{instance_id}': {e}")
+        except Exception as e:
+            print(f"Error assigning IAM instance profile '{instance_profile_arn}' to EC2 instance '{instance_id}': {e}")

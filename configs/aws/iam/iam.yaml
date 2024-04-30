@@ -1,0 +1,4 @@
+defaults:
+  - trainer: trainer_1
+  - server: server_1
+  - _self_

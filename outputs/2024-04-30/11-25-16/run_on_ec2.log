@@ -1,0 +1,5 @@
+[2024-04-30 11:25:18,413][botocore.credentials][INFO] - Found credentials in shared credentials file: ~/.aws/credentials
+[2024-04-30 11:25:20,713][botocore.credentials][INFO] - Found credentials in shared credentials file: ~/.aws/credentials
+[2024-04-30 11:25:22,426][botocore.credentials][INFO] - Found credentials in shared credentials file: ~/.aws/credentials
+[2024-04-30 11:25:24,016][botocore.credentials][INFO] - Found credentials in shared credentials file: ~/.aws/credentials
+[2024-04-30 11:25:25,424][botocore.credentials][INFO] - Found credentials in shared credentials file: ~/.aws/credentials

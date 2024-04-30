@@ -123,15 +123,17 @@ This part is our objective to create. We can alway add more cli command to creat
 
    5. `make version_code`: It tag version to our code and syc it with remote repo. It will auto increment version of code and push it to repo with tag.
 
-   6. `make push_on_ecr`: containerize our code and push it AWS ECR.It will name and tag our container as as per our configuration.
+   6. `make push_code_image_on_ecr`: containerize our code and push it on AWS ECR.It will name and tag our container as as per our configuration.
+   
+   7. `make push_app_image_on_ecr`: containerize our app and push it on AWS ECR.It will name and tag our container as as per our configuration.
 
-   7. `make run_on_ec2`: launches ec2 instance on aws and pull docker container from ecr then run our container.
+   8. `make run_on_ec2`: launches ec2 instance on aws and pull docker container from ecr then run our container.
    It will create new instance as per our configuration and userdata or start old one with new userdata if instance with the same name already exists.It will also create a `key_pair` to ssh into instance if key_pair does not exits and `.gitignore` it. If you have lost old key_pair, Kindly download it manually and `.gitignore` it to make this code work.
 
-   8. `make stop_all_instances`: Will stop all containers in your containers in your aws account, so use it carefully. You can always add or alter code to match your requirements.
+   9. `make stop_all_instances`: Will stop all containers in your containers in your aws account, so use it carefully. You can always add or alter code to match your requirements.
    
-   9. Other Tools:
-      1.  `make write_env_files`: write `requirements.txt` files for `app`, `src` and `code` folder iteratively.
+   10. Other Tools:
+      1.  `make write_env_files`:write `requirements.txt` files for `app`, `src` and `code` folder iteratively.
       2.  `make start_local_server`: start local mlflow server which determine backend store and artifact location. This is for local test only.
       3.  `make lint`: lint our code in `code`, `src` and `app` directory and returns errors, only.
       4.  `make score_lint`: returns pylint score

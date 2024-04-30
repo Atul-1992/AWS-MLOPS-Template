@@ -1,0 +1,72 @@
+aws:
+  ec2:
+    ingress_rules:
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+      IpRanges:
+      - CidrIp: 0.0.0.0/0
+    userdata_script:
+      script: '#!/bin/bash
+
+        yum update -y
+
+        yum install -y httpd
+
+        systemctl start httpd
+
+        systemctl enable httpd
+
+        echo "<html><body><h1>Welcome to My Website</h1></body></html>" > /var/www/html/index.html
+
+        '
+    instance_name: instance_2
+    group_name: aws_template_1
+    key_pair: aws_template_key
+    image_id: ami-001843b876406202a
+    instance_type: t2.micro
+  ecr:
+    code_repository_name: sample_repo_1
+    app_repository_name: app_repo_1
+  s3:
+    storage_url: None
+  iam:
+    trainer:
+      role: trainer_role
+      assume_policy_document: "{\n\"Version\": \"2012-10-17\",\n\"Statement\": [\n\
+        \                {\n                  \"Effect\": \"Allow\",\n           \
+        \       \"Principal\": {\n                    \"Service\": \"ec2.amazonaws.com\"\
+        \n                  },\n                  \"Action\": \"sts:AssumeRole\"\n\
+        \                }\n              ]\n}\n"
+      policy_names:
+      - AmazonS3ReadOnlyAccess
+      - AmazonEC2ContainerRegistryReadOnly
+    server:
+      role: server_role
+      assume_policy_document: "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\"\
+        : [\n    {\n      \"Effect\": \"Allow\",\n      \"Principal\": {\n       \
+        \ \"Service\": \"ec2.amazonaws.com\"\n      },\n      \"Action\": \"sts:AssumeRole\"\
+        \n    }\n  ]\n}\n"
+      policy_names: '[AmazonS3ReadOnlyAccess,
+
+        AmazonEC2ContainerRegistryReadOnly]'
+git:
+  git_remote_name: origin
+  git_remote_url: git@github.com:Atulsain7/AWS-MLOPS-Template.git
+  current_git_branch: main
+dvc:
+  dvc_remote_name: gdrive
+  dvc_remote_url: https://drive.google.com/drive/folders/1YQKvAM4mhU688OBwIDJYfuz2SOAZqk8c?usp=sharing
+  local_data_dir: data_dir
+docker:
+  app:
+    docker_folder: .
+    dockerfile_name: Dockerfile.app
+    image_name: app_image
+    tag: v01
+  code:
+    docker_folder: .
+    dockerfile_name: Dockerfile.train
+    image_name: demo_image
+    tag: v01
+code_update: updated code versioning

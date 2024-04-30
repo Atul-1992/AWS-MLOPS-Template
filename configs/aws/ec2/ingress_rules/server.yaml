@@ -1,3 +1,4 @@
+# configs/aws/ingress_rules/server.yaml
 IpProtocol: tcp
 FromPort: 80
 ToPort: 80

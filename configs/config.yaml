@@ -2,6 +2,7 @@ defaults:
   - aws: aws
   - git: own
   - dvc: gdrive
-  - docker: simple
+  - docker: docker_config
+  - _self_
 
-code_update: 'updated code versioning'
+code_update: 'corrected Instance Profile Scripts and Checked Basic SSH Scipt.'

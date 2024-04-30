@@ -12,8 +12,11 @@
 init:
 	python ./src/execute/init.py
 
-push_on_ecr:
-	python ./src/execute/push_docker_image.py
+push_code_image_on_ecr:
+	python ./src/execute/push_code_image.py
+
+push_app_image_one_ecr:
+	python ./src/execute/push_app_image.py
 
 run_on_ec2:
 	python ./src/execute/run_on_ec2.py

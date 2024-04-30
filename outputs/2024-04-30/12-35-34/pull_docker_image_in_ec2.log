@@ -1,0 +1,5 @@
+[2024-04-30 12:35:34,873][botocore.credentials][INFO] - Found credentials in shared credentials file: ~/.aws/credentials
+[2024-04-30 12:35:38,435][paramiko.transport][INFO] - Connected (version 2.0, client OpenSSH_8.7)
+[2024-04-30 12:35:38,844][paramiko.transport][INFO] - Authentication (publickey) failed.
+[2024-04-30 12:35:39,003][paramiko.transport][INFO] - Authentication (publickey) failed.
+[2024-04-30 12:35:39,622][paramiko.transport][INFO] - Authentication (publickey) failed.

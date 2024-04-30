@@ -1,0 +1,25 @@
+defaults:
+  - _self_
+
+role_name: trainer_role
+assume_policy_document:
+  |
+  {
+  "Version": "2012-10-17",
+  "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": "ec2.amazonaws.com"
+                    },
+                    "Action": "sts:AssumeRole"
+                  }
+                ]
+  }
+
+instance_profile_name: trainer_instance_profile
+policy_names:
+  - "AmazonS3ReadOnlyAccess"
+  - "AmazonEC2ContainerRegistryReadOnly"
+environment_variables:
+  AWS_REGION: ap-south-1
