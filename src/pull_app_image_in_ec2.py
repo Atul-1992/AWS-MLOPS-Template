@@ -1,10 +1,11 @@
-# ./src/execute/pull_server_image_in_ec2.py
+# ./src/execute/pull_app_image_in_ec2.py
 from omegaconf import DictConfig
-from src.processes.setup_process import setup_aws
-from src.Utils.utils import config_initializer
+
+from processes.setup_process import setup_aws
+from utils.utils import config_initializer
 
 
-@config_initializer()
+@config_initializer(__file__)
 def main(cfg: DictConfig):
     aws = setup_aws(cfg)
     aws.ec2_helper.command_instance_with_ssh(

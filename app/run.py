@@ -1,9 +1,10 @@
-from flask import render_template, request, url_for, redirect, flash
-from flask_login import login_user, login_required, logout_user
-from app.setup.forms.login import LoginForm
-from app.setup.forms.register import RegisterForm
+from flask import flash, redirect, render_template, request, url_for
+from flask_login import login_required, login_user, logout_user
+
 from app.projects.project_1 import project_1_bp
 from app.setup import app, db
+from app.setup.forms.login import LoginForm
+from app.setup.forms.register import RegisterForm
 from app.setup.models.user import User
 
 
@@ -38,7 +39,7 @@ def login():
             login_user(user)
             flash("Logged in successfully.")
             next = request.args.get("next")
-            if next == None or not next[0] == "/":
+            if next is None or not next[0] == "/":
                 next = url_for("home")
             return redirect(next)
 

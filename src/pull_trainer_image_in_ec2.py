@@ -1,7 +1,8 @@
 # ./src/execute/pull_trainer_image_in_ec2.py
 from omegaconf import DictConfig
-from src.processes.setup_process import setup_aws
-from src.Utils.utils import config_initializer
+
+from processes.setup_process import setup_aws
+from utils.utils import config_initializer
 
 
 @config_initializer()

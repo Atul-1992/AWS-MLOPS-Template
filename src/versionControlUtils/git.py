@@ -219,8 +219,7 @@ class GitHelper:
                     tags_list.append("0")
                 latest_tag = max(tags_list)
                 return latest_tag
-            else:
-                return None
+            return None
         except subprocess.CalledProcessError as e:
             print(f"Error: {e}")
             return None
@@ -282,16 +281,18 @@ class GitHelper:
                 for branch in branches:
                     print(branch)
                 return branches
-            else:
-                print("No branches found.")
-                return []
+
+            print("No branches found.")
+            return []
         except subprocess.CalledProcessError as e:
             print(f"Error listing branches: {e}")
+            return False
 
     def latest_branch_tag(self, prefix="ds-"):
         branch_names = self.list_branches()
         data_branches = [branch for branch in branch_names if prefix in branch]
-        return max([int(branch[len(prefix) :]) for branch in data_branches])
+        tag_numbers = [int(branch[len(prefix) :]) for branch in data_branches]
+        return max(tag_numbers)
 
     def create_new_ds_branch(self):
         latest_tag = self.latest_branch_tag() + 1

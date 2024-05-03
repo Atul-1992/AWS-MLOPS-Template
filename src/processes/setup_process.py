@@ -1,13 +1,14 @@
 # ./src/processes/setup_process.py
 import os
+
 from src.CloudUtils.ec2 import EC2Helper
 from src.CloudUtils.ecr import ECRHelper
 from src.CloudUtils.iam import IAMHelper
+from src.CloudUtils.login import AWSCredentialManager
 from src.CloudUtils.s3 import S3Helper
 from src.container.docker_container import DockerHelper
-from src.VersionControlUtils.dvc import DVCHelper
-from src.VersionControlUtils.git import GitHelper
-from src.CloudUtils.login import AWSCredentialManager
+from src.versionControlUtils.dvc import DVCHelper
+from src.versionControlUtils.git import GitHelper
 
 
 class AWSSetup:

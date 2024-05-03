@@ -1,7 +1,7 @@
-import paramiko
 import time
 from typing import List
 
+import paramiko
 import paramiko.client
 
 
@@ -21,9 +21,9 @@ class EC2Helper:
 
             if vpc_ids:
                 return vpc_ids[0]  # Assuming there is at least one VPC
-            else:
-                print("No VPCs found in the account.")
-                return None
+
+            print("No VPCs found in the account.")
+            return None
 
         except Exception as e:
             print(f"Error occurred while retrieving VPCs: {e}")
@@ -156,9 +156,9 @@ class EC2Helper:
             if response["Reservations"]:
                 print(f"Instance with name '{instance_name}' already exists.")
                 return True
-            else:
-                print(f"No instance with name '{instance_name}' found.")
-                return False
+
+            print(f"No instance with name '{instance_name}' found.")
+            return False
 
         except Exception as e:
             print(f"Error occurred while checking instance existence: {e}")
@@ -297,7 +297,7 @@ class EC2Helper:
         """
         try:
             # Stop the EC2 instance
-            response = self.ec2.stop_instances(InstanceIds=[instance_id])
+            self.ec2.stop_instances(InstanceIds=[instance_id])
 
             print(f"Stopping EC2 instance '{instance_id}'...")
 
@@ -388,9 +388,9 @@ class EC2Helper:
             if self.varify_instances_stopped(instance_stopped):
                 print(f"Stopped {instance_count} running instances.")
                 return True
-            else:
-                print("Could not stop all instance in time. Verify Manually")
-                return False
+
+            print("Could not stop all instance in time. Verify Manually")
+            return False
 
         except Exception as e:
             print(f"Error occurred while stopping running instances: {e}")
@@ -418,7 +418,6 @@ class EC2Helper:
 
                 for reservation in describe_response["Reservations"]:
                     for instance in reservation["Instances"]:
-                        instance_id = instance["InstanceId"]
                         instance_state = instance["State"]["Name"]
 
                         if instance_state != "stopped":

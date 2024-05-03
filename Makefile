@@ -51,6 +51,9 @@ write_env_files:
 black_format:
 	black ./src/ ./code/ ./app/
 
+isort:
+	isort ./src/ ./code/ ./app/
+
 lint:
 	# pylint ./src/ ./code/ ./app/ | tail -n 2 | head -n 1
 	pylint ./src/ ./code/ ./app/ --errors-only --disable E1120

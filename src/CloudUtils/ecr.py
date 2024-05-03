@@ -1,4 +1,5 @@
 import base64
+
 import docker
 from botocore.exceptions import ClientError
 
@@ -30,7 +31,6 @@ class ECRHelper:
     def tag_image(self, image_name, tag):
         self.get_registry_info()
         old_image_name = f"{image_name}:{tag}"
-        new_image_name = f"{self.repository_uri}:{tag}"
         tagged_image = self.docker_client.images.get(old_image_name)
         tagged_image.tag(f"{self.repository_uri}/{image_name}", tag=tag)
         return True

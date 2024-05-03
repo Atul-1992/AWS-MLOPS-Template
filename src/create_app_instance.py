@@ -1,10 +1,11 @@
 # ./src/execute/run_on_ec2.py
 from omegaconf import DictConfig
-from src.processes.setup_process import setup_aws
-from src.Utils.utils import config_initializer
+
+from processes.setup_process import setup_aws
+from utils.utils import config_initializer
 
 
-@config_initializer()
+@config_initializer(__file__)
 def main(cfg: DictConfig) -> None:
     aws = setup_aws(cfg.docker_dir)
     aws.create_instance(

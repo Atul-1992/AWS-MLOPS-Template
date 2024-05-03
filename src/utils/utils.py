@@ -1,7 +1,8 @@
 import os
+from functools import wraps
+
 import hydra
 from hydra import TaskFunction
-from functools import wraps
 from omegaconf import DictConfig
 
 
@@ -31,10 +32,10 @@ class Utils:
             return False
 
 
-def config_initializer():
+def config_initializer(script_path):
+
     def decorator(taskfunction: TaskFunction):
-        file_path = os.path.dirname(__file__)
-        rel_path = os.path.relpath("./configs", file_path)
+        rel_path = os.path.relpath("./configs", os.path.dirname(script_path))
 
         @hydra.main(config_name="config", config_path=(rel_path), version_base=None)
         @wraps(taskfunction)

@@ -1,4 +1,5 @@
 import os
+
 import boto3
 
 
@@ -42,17 +43,17 @@ class IAMHelper:
         if self.check_role_exists(role_name):
             print(f"IAM role '{role_name}' already exists.")
             return self.get_role_arn(role_name)
-        else:
-            print(f"IAM role '{role_name}' does not exist. Creating...")
-            role_arn = self.create_role(role_name, assume_role_policy_document)
-            print(f"IAM role '{role_name}' created with ARN: {role_arn}")
-            if policy_names:
-                policy_arns = [
-                    self.get_policy_arn(policy_name) for policy_name in policy_names
-                ]
-                self.attach_policies_to_role(role_name, policy_arns)
-                print("Policies attached to the role.")
-            return role_arn
+
+        print(f"IAM role '{role_name}' does not exist. Creating...")
+        role_arn = self.create_role(role_name, assume_role_policy_document)
+        print(f"IAM role '{role_name}' created with ARN: {role_arn}")
+        if policy_names:
+            policy_arns = [
+                self.get_policy_arn(policy_name) for policy_name in policy_names
+            ]
+            self.attach_policies_to_role(role_name, policy_arns)
+            print("Policies attached to the role.")
+        return role_arn
 
     def get_role_arn(self, role_name):
         response = self.iam.get_role(RoleName=role_name)
@@ -110,5 +111,7 @@ class IAMHelper:
             return instance_profile_response["InstanceProfile"]["Arn"]
         except self.iam.exceptions.NoSuchEntityException:
             print(f"IAM instance profile '{instance_profile_name}' not found.")
+            return False
         except Exception as e:
             print(f"Error getting IAM instance profile '{instance_profile_name}': {e}")
+            return False

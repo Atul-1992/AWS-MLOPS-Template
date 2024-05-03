@@ -1,5 +1,5 @@
-import subprocess
 import os
+import subprocess
 
 project_dir = os.getcwd()
 
@@ -56,9 +56,7 @@ class DockerHelper:
         command = ["docker", "exec", container_name] + command.split()
         subprocess.run(command, check=True)
 
-    def run_docker_compose(
-        self, docker_version="1.29.2", project_name="docker_compose_project"
-    ):
+    def run_docker_compose(self, project_name="docker_compose_project"):
         compose_file = f"{self.dockerdir_rel_path}/docker-compose.yml"
 
         command = [

@@ -133,9 +133,9 @@ class DVCHelper:
             ):
                 print("Dataset is up to date.")
                 return False
-            else:
-                print("Dataset needs to be updated.")
-                return True
+
+            print("Dataset needs to be updated.")
+            return True
         except subprocess.CalledProcessError as e:
             print(f"Error checking dataset status: {e}")
             return False
