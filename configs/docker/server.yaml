@@ -1,0 +1,5 @@
+
+dockerfile_name: Dockerfile.server
+image_name: server_image
+tag: v01
+repository_name: server_repo

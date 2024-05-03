@@ -1,87 +1,24 @@
+# ./src/processes/setup_process.py
+import os
 from src.CloudUtils.ec2 import EC2Helper
 from src.CloudUtils.ecr import ECRHelper
 from src.CloudUtils.iam import IAMHelper
-
-# from src.CloudUtils.aws_config import AWSConfig
 from src.CloudUtils.s3 import S3Helper
 from src.container.docker_container import DockerHelper
 from src.VersionControlUtils.dvc import DVCHelper
 from src.VersionControlUtils.git import GitHelper
-import os
+from src.CloudUtils.login import AWSCredentialManager
 
 
-class GeneralProcess:
-    def __init__(
-        self,
-        local_data_dir,
-        dvc_remote_name,
-        dvc_remote_url,
-        git_remote_name,
-        git_remote_url,
-        current_git_branch="main",
-        docker_folder="docker",
-        s3_bucket_path=None,
-    ) -> None:
-
-        self.code_version = 0
-        self.dataset_version = 0
-        self.s3_bucket_path = s3_bucket_path
-        self.data_dir = local_data_dir
-
+class AWSSetup:
+    def __init__(self, docker_folder="docker_dir") -> None:
         self.project_dir = os.getcwd()
-        self.git_helper = GitHelper(
-            repo_dir=self.project_dir,
-            branch=current_git_branch,
-            remote_name=git_remote_name,
-            remote_url=git_remote_url,
-        )
-        self.dvc_helper = DVCHelper(
-            self.project_dir,
-            data_dir=local_data_dir,
-            remote_name=dvc_remote_name,
-            remote_url=dvc_remote_url,
-        )
-        self.ec2_helper = EC2Helper(self.project_dir)
-        self.s3_helper = S3Helper(self.project_dir)
-        self.ecr_helper = ECRHelper(self.project_dir)
-        self.iam_helper = IAMHelper(self.project_dir)
-        self.container_helper = DockerHelper(self.project_dir, docker_folder)
-
-    def initialize_project(self):
-        self.git_helper.init()
-        self.dvc_helper.init()
-        self.git_helper.add_to_gitignore(f"/{self.data_dir}")
-        self.git_helper.add_to_gitignore("/env_files")
-        self.git_helper.add(["."])
-        # self.git_helper.add(['.dvc', 'data_dir.dvc'])
-        self.git_helper.commit(f"Initialized with code version: {self.code_version}")
-        self.git_helper.version_code()
-        self.git_helper.create_remote()
-        self.dvc_helper.push()
-        self.git_helper.push()
-        return True
-
-    def version_dataset(self):
-        tags = {"Dataset Version": self.dataset_version}
-        if self.dvc_helper.needs_update():
-            self.dvc_helper.pull()
-            self.git_helper.add(".dvc/*")
-            self.git_helper.commit()
-            self.git_helper.tag(tags)
-            self.git_helper.push()
-            self.dataset_version += 1
-            return True
-        return False
-
-    def version_code(self, message=""):
-        if self.git_helper.needs_commit(["./src/", "./configs/"]):
-            self.git_helper.add(["."])
-            self.git_helper.commit(message)
-            self.git_helper.version_code()
-            self.git_helper.push()
-            return True
-        print("There is no change in `src` or `configs` folder to commit!")
-        return False
+        session = AWSCredentialManager().get_aws_session()
+        self.ec2_helper = EC2Helper(session)
+        self.s3_helper = S3Helper(session)
+        self.ecr_helper = ECRHelper(session)
+        self.iam_helper = IAMHelper(session)
+        self.container_helper = DockerHelper(docker_folder)
 
     def push_on_ecr(self, dockerfile_name, image_name, tag, repository_name=None):
         self.container_helper.build_image(dockerfile_name, image_name, tag)
@@ -102,7 +39,7 @@ class GeneralProcess:
         instance_profile_name,
         ingress_rules,
         userdata_script,
-        environment_variables=None
+        environment_variables=None,
     ):
         group_id1 = self.ec2_helper.create_security_group(
             group_name=group_name,
@@ -110,12 +47,15 @@ class GeneralProcess:
             ingress_rules=ingress_rules,
         )
         key_name = self.ec2_helper.check_or_create_key_pair(key_pair_name=key_pair)
-        self.iam_helper.create_or_get_role(role_name,
-                                           assume_role_policy_document=assume_role_policy_document,
-                                           policy_names=policy_names)
+        self.iam_helper.create_or_get_role(
+            role_name,
+            assume_role_policy_document=assume_role_policy_document,
+            policy_names=policy_names,
+        )
         self.iam_helper.create_instance_profile(instance_profile_name)
-        instance_profile_arn = self.iam_helper.add_roles_to_instance_profile(instance_profile_name=instance_profile_name,
-                                                      role_names=[role_name])
+        instance_profile_arn = self.iam_helper.add_roles_to_instance_profile(
+            instance_profile_name=instance_profile_name, role_names=[role_name]
+        )
         self.ec2_helper.create_or_start_ec2_instance_with_userdata(
             instance_name=instance_name,
             image_id=image_id,
@@ -125,34 +65,87 @@ class GeneralProcess:
             security_group_ids=[group_id1],
             instance_profile_arn=instance_profile_arn,
             environment_variables=environment_variables,
-            
         )
 
     def stop_all_instances(self):
         self.ec2_helper.stop_all_running_instances()
 
 
-def setup_general_process(config):
-    # Extract configuration parameters
-    local_data_dir = config["dvc"]["local_data_dir"]
-    dvc_remote_name = config["dvc"]["dvc_remote_name"]
-    dvc_remote_url = config["dvc"]["dvc_remote_url"]
-    git_remote_name = config["git"]["git_remote_name"]
-    git_remote_url = config["git"]["git_remote_url"]
-    current_git_branch = config["git"]["current_git_branch"]
-    docker_folder = config["docker"]["docker_folder"]
-    s3_bucket_path = config["aws"]["s3"]["storage_url"]
+class VersionControlSetup:
+    def __init__(
+        self,
+        current_branch,
+        remote_name,
+        remote_url,
+        local_data_dir,
+        data_remote_name,
+        data_remote_repo,
+    ) -> None:
+        self.repo_dir = (os.getcwd(),)
+        self.branch = (current_branch,)
+        self.remote_name = (remote_name,)
+        self.remote_url = (remote_url,)
+        self.git_helper = GitHelper(
+            repo_dir=self.repo_dir,
+            branch=self.branch,
+            remote_name=self.remote_name,
+            remote_url=self.remote_url,
+        )
+        self.local_data_dir = local_data_dir
+        self.data_remote_name = data_remote_name
+        self.data_remote_repo = data_remote_repo
+        self.dvc_helper = DVCHelper(
+            self.repo_dir,
+            data_dir=self.local_data_dir,
+            remote_name=self.data_remote_name,
+            remote_url=self.data_remote_repo,
+        )
 
-    # Create GeneralProcess instance with specified configuration
-    processes = GeneralProcess(
-        local_data_dir=local_data_dir,
-        dvc_remote_name=dvc_remote_name,
-        dvc_remote_url=dvc_remote_url,
-        git_remote_name=git_remote_name,
-        git_remote_url=git_remote_url,
-        current_git_branch=current_git_branch,
-        docker_folder=docker_folder,
-        s3_bucket_path=s3_bucket_path,
+    def initialize_project(self):
+        self.git_helper.init()
+        self.dvc_helper.init()
+        self.git_helper.add_to_gitignore(f"/{self.local_data_dir}")
+        self.git_helper.add_to_gitignore("/env_files")
+        self.git_helper.add(["."])
+        # self.git_helper.add(['.dvc', 'data_dir.dvc'])
+        self.git_helper.commit(f"Initialized with code version: {self.version_code}")
+        self.git_helper.version_code()
+        self.git_helper.create_remote()
+        self.dvc_helper.push()
+        self.git_helper.push()
+        return True
+
+    def version_dataset(self):
+        if self.dvc_helper.needs_update():
+            self.dvc_helper.import_data()
+            self.git_helper.add([f"{self.local_data_dir}.dvc"])
+            tag = self.git_helper.version_code("d")
+            self.git_helper.commit(f"Dataset Updated with Dataset Version: {tag}")
+            self.git_helper.push()
+            return True
+        return False
+
+    def version_code(self, message=""):
+        if self.git_helper.needs_commit(["./src/", "./configs/"]):
+            self.git_helper.add(["."])
+            self.git_helper.commit(message)
+            self.git_helper.version_code()
+            self.git_helper.push()
+            return True
+        print("There is no change in `src` or `configs` folder to commit!")
+        return False
+
+
+def setup_aws(cfg):
+    return AWSSetup(docker_folder=cfg.docker.docker_dir)
+
+
+def setup_version_control(cfg):
+    return VersionControlSetup(
+        cfg.version_control.git.git_branch,
+        cfg.version_control.git.git_remote_name,
+        cfg.version_control.git.git_repo_url,
+        cfg.version_control.dvc.local_data_dir,
+        cfg.version_control.dvc.data_remote_name,
+        cfg.version_control.dvc.data_remote_repo_url,
     )
-
-    return processes

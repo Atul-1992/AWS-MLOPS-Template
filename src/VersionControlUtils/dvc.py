@@ -7,10 +7,11 @@ class DVCHelper:
         self.data_version = 0
         self.data_dir = data_dir
         self.remote_name = remote_name
+        self.remote_url = remote_url
 
         if not self.is_dvc_repo():
             self.init()
-        self.add_remote(remote_name, remote_url)
+        self.add_remote()
 
     def is_dvc_repo(self):
         """
@@ -50,23 +51,39 @@ class DVCHelper:
         command = ["dvc", "add", data_dir]
         try:
             subprocess.run(command, cwd=self.project_dir, check=True)
-            self.data_dir = [self.data_dir].append(data_dir)
+            if isinstance((self.data_dir), list):
+                self.data_dir.append(data_dir)
+            else:
+                [self.data_dir].append(data_dir)
             return True
         except subprocess.CalledProcessError as e:
             print(f"Error adding data to DVC repository: {e}")
             return False
 
-    def add_remote(self, remote_name, remote_url):
+    def add_remote(self):
         """
         Add a remote to the DVC repository.
         """
-        command = ["dvc", "remote", "add", remote_name, remote_url]
+        command = ["dvc", "remote", "add", "-d", self.remote_name, self.remote_url]
         try:
             if not self.does_remote_exist():
                 subprocess.run(command, cwd=self.project_dir, check=True)
             return True
         except subprocess.CalledProcessError as e:
             print(f"Error adding remote to DVC repository: {e}")
+            return False
+
+    def import_data(self):
+        """
+        Add a remote to the DVC repository.
+        """
+        command = ["dvc", "import", "-o", "output", self.data_dir, self.remote_url]
+        try:
+            if not self.does_remote_exist():
+                subprocess.run(command, cwd=self.project_dir, check=True)
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"Error pulling data from remote repository {self.remote_url}: {e}")
             return False
 
     def push(self):
@@ -150,4 +167,17 @@ class DVCHelper:
             return self.remote_name in remotes
         except subprocess.CalledProcessError:
             # Handle any errors (e.g., if DVC command fails)
+            return False
+
+    def update_dataset(self):
+        """
+        Pull data tracked by DVC from the configured remote storage.
+        """
+        command = ["dvc", "update", self.data_dir]
+        try:
+            subprocess.run(command, cwd=self.project_dir, check=True)
+            print("Data pulled from DVC remote successfully.")
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"Error pulling data from DVC remote: {e}")
             return False

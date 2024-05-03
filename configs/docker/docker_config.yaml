@@ -1,6 +1,0 @@
-defaults:
-  - app: demo_app_1
-  - code: demo_code_1
-  - _self_
-
-docker_folder: ./docker_dir

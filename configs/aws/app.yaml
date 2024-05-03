@@ -1,0 +1,13 @@
+defaults:
+  - Ingress_rules: ssh
+  - userdata_script: sample_script
+  - instance_profile: instance_profile_1
+  - _self_
+
+region: ap-south-1
+instance_type: t2.micro
+image_id: ami-001843b876406202a
+instance_name: server_instance
+environment_variables: None
+group_name: server_group
+key_pair: aws_template_key

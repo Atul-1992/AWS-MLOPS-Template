@@ -1,0 +1,85 @@
+modules:
+- aws:
+    instance_name: null
+    ingress_rules: null
+    userdata_script: null
+    environment_variables: null
+    instance_type: t2.micro
+    group_name: ???
+    image_id: ami-001843b876406202a
+    region: ap-south-1
+    key_pair: ???
+    instance_profile_name: ???
+    role_name: ???
+    assume_role_policy_document: ???
+    policy_names: ???
+  docker:
+    dockerfile_name: ???
+    image_name: ???
+    tag: ???
+    repository_name: ???
+  version_control:
+    git:
+      git_branch: main
+      git_remote_name: origin
+      git_repo_url: git@github.com:Atulsain7/AWS-MLOPS-Template.git
+    dvc:
+      data_remote_repo_url: dvc_s3_repo
+      local_data_dir: data_dir
+      data_remote_name: s3
+- aws:
+    instance_name: null
+    ingress_rules: null
+    userdata_script: null
+    environment_variables: null
+    instance_type: t2.micro
+    group_name: ???
+    image_id: ami-001843b876406202a
+    region: ap-south-1
+    key_pair: ???
+    instance_profile_name: ???
+    role_name: ???
+    assume_role_policy_document: ???
+    policy_names: ???
+  docker:
+    dockerfile_name: ???
+    image_name: ???
+    tag: ???
+    repository_name: ???
+  version_control:
+    git:
+      git_branch: main
+      git_remote_name: origin
+      git_repo_url: git@github.com:Atulsain7/AWS-MLOPS-Template.git
+    dvc:
+      data_remote_repo_url: dvc_s3_repo
+      local_data_dir: data_dir
+      data_remote_name: s3
+- aws:
+    instance_name: null
+    ingress_rules: null
+    userdata_script: null
+    environment_variables: null
+    instance_type: t2.micro
+    group_name: ???
+    image_id: ami-001843b876406202a
+    region: ap-south-1
+    key_pair: ???
+    instance_profile_name: ???
+    role_name: ???
+    assume_role_policy_document: ???
+    policy_names: ???
+  docker:
+    dockerfile_name: ???
+    image_name: ???
+    tag: ???
+    repository_name: ???
+  version_control:
+    git:
+      git_branch: main
+      git_remote_name: origin
+      git_repo_url: git@github.com:Atulsain7/AWS-MLOPS-Template.git
+    dvc:
+      data_remote_repo_url: dvc_s3_repo
+      local_data_dir: data_dir
+      data_remote_name: s3

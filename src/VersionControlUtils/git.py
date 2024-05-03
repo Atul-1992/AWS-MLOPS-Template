@@ -25,8 +25,10 @@ class GitHelper:
         Initialize a new Git repository in the specified directory.
         """
         if not self.is_git_repo():
-            subprocess.run(["git", "init", self.repo_dir])
-            subprocess.run(["git", "-C", self.repo_dir, "checkout", "-b", "main"])
+            subprocess.run(["git", "init", self.repo_dir], check=True)
+            subprocess.run(
+                ["git", "-C", self.repo_dir, "checkout", "-b", "main"], check=True
+            )
             print(f"Initialized Git repository in: {self.repo_dir}")
         else:
             print("This repo is already initialized!")
@@ -36,14 +38,16 @@ class GitHelper:
         Stage specified files in a Git repository for the next commit.
         """
         file_paths = [os.path.abspath(file_path) for file_path in file_paths]
-        subprocess.run(["git", "-C", self.repo_dir, "add"] + file_paths)
+        subprocess.run(["git", "-C", self.repo_dir, "add"] + file_paths, check=True)
 
     def commit(self, commit_message=""):
         """
         Commit changes in a local Git repository.
         """
         if self.needs_commit(["."]):
-            subprocess.run(["git", "-C", self.repo_dir, "commit", "-m", commit_message])
+            subprocess.run(
+                ["git", "-C", self.repo_dir, "commit", "-m", commit_message], check=True
+            )
             print(
                 f"Committed changes to repository '{self.repo_dir}' with message: {commit_message}"
             )
@@ -68,9 +72,10 @@ class GitHelper:
                 "--set-upstream",
                 remote_name,
                 self.branch,
-            ]
+            ],
+            check=True,
         )
-        subprocess.run(["git", "-C", self.repo_dir, "push", "--tags"])
+        subprocess.run(["git", "-C", self.repo_dir, "push", "--tags"], check=True)
         print(
             f"Pushed commits to {remote_name}/{self.branch} from repository: {self.repo_dir}"
         )
@@ -92,7 +97,8 @@ class GitHelper:
                 "add",
                 self.remote_name,
                 self.remote_url,
-            ]
+            ],
+            check=True,
         )
         print(
             f"Successfully created remote '{self.remote_name}' ({self.remote_url}) in repository: {self.repo_dir}"
@@ -116,7 +122,7 @@ class GitHelper:
             git_command.extend(["--", directory])
 
         # Run git status command to check for changes in specified directories
-        result = subprocess.run(git_command, capture_output=True, text=True)
+        result = subprocess.run(git_command, capture_output=True, text=True, check=True)
 
         # Check if there is any output from git status (indicating changes)
         return bool(result.stdout.strip())
@@ -128,6 +134,7 @@ class GitHelper:
         result = subprocess.run(
             ["git", "-C", self.repo_dir, "remote", "get-url", remote_name],
             capture_output=True,
+            check=True,
         )
         return result.stdout.strip().decode("utf-8")
 
@@ -146,7 +153,9 @@ class GitHelper:
         Create tags with messages in the local Git repository.
         """
         for key, value in tags.items():
-            subprocess.run(["git", "-C", self.repo_dir, "tag", "-a", key, "-m", value])
+            subprocess.run(
+                ["git", "-C", self.repo_dir, "tag", "-a", key, "-m", value], check=True
+            )
         return True
 
     def needs_update(self):
@@ -154,7 +163,9 @@ class GitHelper:
         Check if the local Git repository needs to be updated.
         """
         result = subprocess.run(
-            ["git", "-C", self.repo_dir, "status", "--porcelain"], capture_output=True
+            ["git", "-C", self.repo_dir, "status", "--porcelain"],
+            capture_output=True,
+            check=True,
         )
         return bool(result.stdout.strip())
 
@@ -163,11 +174,12 @@ class GitHelper:
         Add a directory to .gitignore in the local Git repository.
         """
         gitignore_path = os.path.join(self.repo_dir, ".gitignore")
-        with open(gitignore_path, "a") as gitignore_file:
+        with open(gitignore_path, "a", encoding="utf-8") as gitignore_file:
             gitignore_file.write(f"\n{directory_name}\n")
-        subprocess.run(["git", "-C", self.repo_dir, "add", gitignore_path])
+        subprocess.run(["git", "-C", self.repo_dir, "add", gitignore_path], check=True)
         subprocess.run(
-            ["git", "-C", self.repo_dir, "commit", "-m", f"Ignore {directory_name}"]
+            ["git", "-C", self.repo_dir, "commit", "-m", f"Ignore {directory_name}"],
+            check=True,
         )
         return True
 
@@ -181,6 +193,7 @@ class GitHelper:
             self.tag_commit(tag_name)
 
             print(f"Tagged current commit with version: {tag_name}")
+            return tag_name
         else:
             print("Error: Failed to increment version.")
 
@@ -191,6 +204,7 @@ class GitHelper:
                 ["git", "-C", self.repo_dir, "tag", "--list", f"{tag_prefix}*"],
                 capture_output=True,
                 text=True,
+                check=True,
             )
             tags_list = result.stdout.strip().split("\n")
 
@@ -219,20 +233,24 @@ class GitHelper:
     def tag_commit(self, tag_name):
         # Tag the current commit with the specified tag name
         try:
-            subprocess.run(["git", "-C", self.repo_dir, "tag", tag_name])
+            subprocess.run(["git", "-C", self.repo_dir, "tag", tag_name], check=True)
         except subprocess.CalledProcessError as e:
             print(f"Error: {e}")
 
     def create_branch(self, branch_name):
         try:
-            subprocess.run(["git", "-C", self.repo_dir, "branch", branch_name])
+            subprocess.run(
+                ["git", "-C", self.repo_dir, "branch", branch_name], check=True
+            )
             print(f"Created branch '{branch_name}'")
         except subprocess.CalledProcessError as e:
             print(f"Error creating branch: {e}")
 
     def switch_to_branch(self, branch_name):
         try:
-            subprocess.run(["git", "-C", self.repo_dir, "checkout", branch_name])
+            subprocess.run(
+                ["git", "-C", self.repo_dir, "checkout", branch_name], check=True
+            )
             self.branch = branch_name
             print(f"Switched to branch '{branch_name}'")
         except subprocess.CalledProcessError as e:
@@ -246,7 +264,10 @@ class GitHelper:
         try:
             # Run 'git branch' command to list all branches
             result = subprocess.run(
-                ["git", "-C", self.repo_dir, "branch"], capture_output=True, text=True
+                ["git", "-C", self.repo_dir, "branch"],
+                capture_output=True,
+                text=True,
+                check=True,
             )
 
             # Get the output from the command
@@ -260,8 +281,10 @@ class GitHelper:
                 print("List of branches:")
                 for branch in branches:
                     print(branch)
+                return branches
             else:
                 print("No branches found.")
+                return []
         except subprocess.CalledProcessError as e:
             print(f"Error listing branches: {e}")
 
@@ -274,5 +297,5 @@ class GitHelper:
         latest_tag = self.latest_branch_tag() + 1
         self.create_and_switch_to_branch(f"ds-{latest_tag}")
 
-    def version_dataset(self):
-        self.create_and_switch_to_branch()
+    # def version_dataset(self):
+    #     self.create_and_switch_to_branch()

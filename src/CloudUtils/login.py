@@ -8,8 +8,8 @@ class AWSCredentialManager:
     def get_aws_session(self):
         # List of authentication methods to try
         authentication_methods = [
-            self.try_with_aws_cli_configuration,
             self.try_with_environment_variables,
+            self.try_with_aws_cli_configuration,
         ]
 
         # Try each authentication method
@@ -34,7 +34,7 @@ class AWSCredentialManager:
     def try_with_aws_cli_configuration(self):
         # Attempt to create a Boto3 session using AWS CLI configuration
         try:
-            session = boto3.Session()
+            session = boto3.Session(profile_name="default")
             # Check if session is valid by making a simple API call
             session.client("sts").get_caller_identity()
             return session

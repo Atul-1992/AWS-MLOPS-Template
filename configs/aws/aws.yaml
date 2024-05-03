@@ -1,6 +1,0 @@
-defaults:
-  - ec2: general
-  - ecr: ecr
-  - s3: general
-  - iam: iam
-  - _self_

@@ -9,6 +9,7 @@ project_1_bp = Blueprint(
 def project_1():
     return render_template("project_1.html")
 
+
 @project_1_bp.route("/project_2")
 def project_2():
     return render_template("project_2.html")

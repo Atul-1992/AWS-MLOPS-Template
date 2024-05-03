@@ -1,4 +1,8 @@
 import os
+import hydra
+from hydra import TaskFunction
+from functools import wraps
+from omegaconf import DictConfig
 
 
 class Utils:
@@ -18,10 +22,25 @@ class Utils:
             return False
         mode = "w" if method == "w" else "a"
         try:
-            with open(file, mode) as f:
+            with open(file, mode, encoding="utf-8") as f:
                 if text + "\n" in f.read_lines():
                     return True
                 f.write(f"{text}\n")
             return True
         except IOError:
             return False
+
+
+def config_initializer():
+    def decorator(taskfunction: TaskFunction):
+        file_path = os.path.dirname(__file__)
+        rel_path = os.path.relpath("./configs", file_path)
+
+        @hydra.main(config_name="config", config_path=(rel_path), version_base=None)
+        @wraps(taskfunction)
+        def decorated_main(cfg: DictConfig):
+            return taskfunction(cfg)
+
+        return decorated_main
+
+    return decorator

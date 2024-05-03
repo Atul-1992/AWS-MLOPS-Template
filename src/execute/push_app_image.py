@@ -1,18 +1,17 @@
-import hydra
+# ./src/execute/push_app_image.py
 from omegaconf import DictConfig
+from src.processes.setup_process import setup_aws
+from src.Utils.utils import config_initializer
 
 
-from src.processes.setup_process import setup_general_process
-
-
-@hydra.main(config_name="config", config_path="../../configs", version_base=None)
+@config_initializer()
 def main(cfg: DictConfig) -> None:
-    processes = setup_general_process(cfg)
-    processes.push_on_ecr(
-        dockerfile_name=cfg["docker"]["app"]["dockerfile_name"],
-        image_name=cfg["docker"]['app']["image_name"],
-        tag=cfg["docker"]['app']["tag"],
-        repository_name=cfg["aws"]["ecr"]["app_repository_name"],
+    aws = setup_aws(cfg)
+    aws.push_on_ecr(
+        dockerfile_name=cfg.app.docker.dockerfile,
+        image_name=cfg.app.docker.image_name,
+        tag=cfg.app.docker.tag,
+        repository_name=cfg.app.docker.ecr.repository_name,
     )
 
 

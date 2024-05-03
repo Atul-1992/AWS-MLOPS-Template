@@ -1,0 +1,4 @@
+configs_1:
+  random_1: random_1
+  random_3: random3
+aws: $(configs_1.random_3)

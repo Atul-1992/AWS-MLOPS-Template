@@ -1,21 +1,15 @@
-import boto3
 import paramiko
-import os
 import time
 from typing import List
 
 import paramiko.client
-from src.Utils.utils import Utils
-from src.CloudUtils.aws import AWSHelper
-from src.CloudUtils.login import AWSCredentialManager
 
 
-class EC2Helper(AWSHelper):
-    def __init__(self, cwd) -> None:
-        super().__init__(cwd)
-        self.session = AWSCredentialManager().get_aws_session()
+class EC2Helper:
+    def __init__(self, session) -> None:
+        self.session = session
         self.ec2 = self.session.client("ec2")
-        self.vpc_id = self.get_vpc_id()[0]
+        self.vpc_id = self.get_vpc_id()
 
     def get_vpc_id(self):
         try:
@@ -26,7 +20,7 @@ class EC2Helper(AWSHelper):
             vpc_ids = [vpc["VpcId"] for vpc in response["Vpcs"]]
 
             if vpc_ids:
-                return vpc_ids
+                return vpc_ids[0]  # Assuming there is at least one VPC
             else:
                 print("No VPCs found in the account.")
                 return None
@@ -200,7 +194,7 @@ class EC2Helper(AWSHelper):
         userdata_script,
         security_group_ids: list,
         instance_profile_arn=None,
-        environment_variables=None
+        environment_variables=None,
     ):
         try:
             # Check if instance with specified name already exists
@@ -221,9 +215,11 @@ class EC2Helper(AWSHelper):
                     )
                     self.ec2.start_instances(InstanceIds=[instance_id])
                     print(f"Starting EC2 instance with ID '{instance_id}'...")
-            
+
                     # Wait until the instance is running
-                    self.ec2.get_waiter('instance_running').wait(InstanceIds=[instance_id])
+                    self.ec2.get_waiter("instance_running").wait(
+                        InstanceIds=[instance_id]
+                    )
                     print(f"EC2 instance with ID '{instance_id}' started successfully.")
                     return instance_id
             else:
@@ -249,7 +245,9 @@ class EC2Helper(AWSHelper):
                     ],
                 }
                 if instance_profile_arn:
-                    run_instance_params["IamInstanceProfile"] = {"Arn": instance_profile_arn}
+                    run_instance_params["IamInstanceProfile"] = {
+                        "Arn": instance_profile_arn
+                    }
 
                 response = self.ec2.run_instances(**run_instance_params)
                 instance_id = response["Instances"][0]["InstanceId"]
@@ -264,7 +262,6 @@ class EC2Helper(AWSHelper):
         except Exception as e:
             print(f"Error creating or starting EC2 instance: {e}")
             return None
-
 
     def get_instance_id_by_name(self, instance_name):
         try:
@@ -354,14 +351,10 @@ class EC2Helper(AWSHelper):
             if error_code != "InvalidKeyPair.NotFound":
                 print(f"Error checking key pair: {e}")
                 return None
-        
+
         try:
             # Create the new key pair
-            Utils.text_appender(f"{self.working_directory}/.gitignore", key_pair_name)
             response = self.ec2.create_key_pair(KeyName=key_pair_name)
-            # Save the private key to a file (optional)
-            with open(os.path.join(self.working_directory, f"{key_pair_name}.pem"), "w", encoding='utf-8') as f:
-                f.write(response["KeyMaterial"])
             print(f"New key pair '{key_pair_name}' created.")
             return key_pair_name
         except Exception as e:
@@ -396,7 +389,7 @@ class EC2Helper(AWSHelper):
                 print(f"Stopped {instance_count} running instances.")
                 return True
             else:
-                print("Could not stop all instance in time. Varify Manually")
+                print("Could not stop all instance in time. Verify Manually")
                 return False
 
         except Exception as e:
@@ -454,7 +447,7 @@ class EC2Helper(AWSHelper):
             ][0]["Instances"][0]
             return instance
         except Exception as e:
-            print(f"Excepation Raised in {self}:", e)
+            print(f"Exception Raised in {self}: {e}")
             return False
 
     def get_private_ip(self, instance_name):
@@ -508,23 +501,30 @@ class EC2Helper(AWSHelper):
             print("All listed instances are not in 'running' status.")
         return False
 
-    def assign_instance_profile_to_ec2_instance(self, instance_id, instance_profile_arn):
+    def assign_instance_profile_to_ec2_instance(
+        self, instance_id, instance_profile_arn
+    ):
         try:
             # Assign the instance profile to the EC2 instance
             self.ec2.associate_iam_instance_profile(
-                IamInstanceProfile={
-                    'Arn': instance_profile_arn
-                },
-                InstanceId=instance_id
+                IamInstanceProfile={"Arn": instance_profile_arn}, InstanceId=instance_id
             )
-            print(f"IAM instance profile '{instance_profile_arn}' assigned to EC2 instance '{instance_id}'.")
-        except self.iam.exceptions.NoSuchEntityException:
+            print(
+                f"IAM instance profile '{instance_profile_arn}' assigned to EC2 instance '{instance_id}'."
+            )
+        except self.session.client("iam").exceptions.NoSuchEntityException:
             print(f"IAM instance profile '{instance_profile_arn}' not found.")
         except self.ec2.exceptions.ClientError as e:
-            error_code = e.response['Error']['Code']
-            if error_code == 'InvalidParameterValue':
-                print(f"Invalid parameter value. Check if the instance ID '{instance_id}' is correct.")
+            error_code = e.response["Error"]["Code"]
+            if error_code == "InvalidParameterValue":
+                print(
+                    f"Invalid parameter value. Check if the instance ID '{instance_id}' is correct."
+                )
             else:
-                print(f"Error assigning IAM instance profile '{instance_profile_arn}' to EC2 instance '{instance_id}': {e}")
+                print(
+                    f"Error assigning IAM instance profile '{instance_profile_arn}' to EC2 instance '{instance_id}': {e}"
+                )
         except Exception as e:
-            print(f"Error assigning IAM instance profile '{instance_profile_arn}' to EC2 instance '{instance_id}': {e}")
+            print(
+                f"Error assigning IAM instance profile '{instance_profile_arn}' to EC2 instance '{instance_id}': {e}"
+            )

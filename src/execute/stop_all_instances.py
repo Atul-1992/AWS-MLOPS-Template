@@ -1,18 +1,13 @@
-import os
-import sys
-import hydra
+# ./src/execute/stop_all_instance.py
 from omegaconf import DictConfig
-
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-
-sys.path.append(project_root)
-from src.processes.setup_process import setup_general_process
+from src.processes.setup_process import setup_aws
+from src.Utils.utils import config_initializer
 
 
-@hydra.main(config_name="config", config_path="../../configs", version_base=None)
+@config_initializer()
 def main(cfg: DictConfig) -> None:
-    processes = setup_general_process(cfg)
-    processes.stop_all_instances()
+    aws = setup_aws(cfg)
+    aws.ec2_helper.stop_all_running_instances()
 
 
 if __name__ == "__main__":

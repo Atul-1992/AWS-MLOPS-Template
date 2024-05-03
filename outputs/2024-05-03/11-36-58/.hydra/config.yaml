@@ -1,0 +1,42 @@
+workers:
+  server:
+    aws:
+      region: ap-south-1
+      instance_type: t2.micro
+      image_id: ami-001843b876406202a
+      ingress_rules:
+      - configs/aws/ingress_rules/ssh.yaml
+      userdata_script: ${aws/userdata_script/sample_script}
+      instance_name: server_instance
+      environment_variables: None
+      group_name: server_group
+      key_pair: aws_template_key
+      instance_profile: ${aws/instance_profile/instance_profile_1}
+    docker:
+      dockerfile_name: Dockerfile.server
+      image_name: server_image
+      tag: v01
+      repository_name: server_repo
+  app:
+    aws: aws_app
+    docker:
+      dockerfile_name: Dockerfile.server
+      image_name: server_image
+      tag: v01
+      repository_name: server_repo
+  trainer:
+    aws: aws_trainer
+    docker:
+      dockerfile_name: Dockerfile.server
+      image_name: server_image
+      tag: v01
+      repository_name: server_repo
+version_control:
+  git:
+    git_branch: main
+    git_remote_name: origin
+    git_repo_url: git@github.com:Atulsain7/AWS-MLOPS-Template.git
+  dvc:
+    data_remote_repo_url: dvc_s3_repo
+    local_data_dir: data_dir
+    data_remote_name: s3

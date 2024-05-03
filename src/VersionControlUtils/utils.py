@@ -15,6 +15,7 @@ class GitHelper:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
+                check=True,
             )
             if result.returncode == "0":
                 return True, result.stdout.strip()
@@ -23,8 +24,8 @@ class GitHelper:
         except subprocess.CalledProcessError as e:
             return False, str(e)
 
-    def create_repository(self, directory):
-        success, output = self.run_git_command("git init", working_directory=directory)
+    def create_repository(self):
+        success, output = self.run_git_command("git init")
         if success:
             self.run_git_command("git branch -m master main")
             return True, "Git repository created successfully."
@@ -41,7 +42,7 @@ class GitHelper:
     def push_to_remote(self):
         self.run_git_command("git add .")
         self.version_code()
-        success, output = self.run_git_command(f"git push -u origin main")
+        success, output = self.run_git_command("git push -u origin main")
         self.version = self.version - 1
         if success:
             return True, "Local changes pushed to remote repository."
@@ -73,6 +74,7 @@ class DVCHelper:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
+                check=True,
             )
             if result.returncode == "0":
                 return True, result.stdout.strip()
@@ -102,7 +104,7 @@ class DVCHelper:
         return True
 
     def set_remote_storage(self, storage_path, remote_name="myremote"):
-        self.run_commnad(f"dvc remote add -d {remote_name} {storage_path}")
+        self.run_command(f"dvc remote add -d {remote_name} {storage_path}")
         return True
 
     def create_stage(

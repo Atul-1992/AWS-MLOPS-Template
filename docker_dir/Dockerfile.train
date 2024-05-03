@@ -2,7 +2,7 @@ FROM python:3.12
 
 COPY ./code /code
 COPY ./code_config code_config
-COPY ./.dvc ./data_dir.dvc /
-RUN python3 -m venv .venv && pip install -r requirements.txt
+COPY ./.dvc ./data_dir.dvc 
+RUN python3 -m venv .venv && pip install -r /code/requirements.txt
 
 ENTRYPOINT [ "/.venv/bin/python" ]

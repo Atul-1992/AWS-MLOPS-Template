@@ -1,0 +1,8 @@
+git:
+  git_branch: main
+  git_remote_name: origin
+  git_repo_url: git@github.com:Atulsain7/AWS-MLOPS-Template.git
+dvc:
+  data_remote_repo_url: dvc_s3_repo
+  local_data_dir: data_dir
+  data_remote_name: s3

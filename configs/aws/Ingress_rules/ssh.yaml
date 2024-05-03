@@ -1,0 +1,4 @@
+IpRanges: cidr_ip_ranges
+IpProtocol: 'tcp'
+FromPort: 22
+ToPort: 22

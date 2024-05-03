@@ -1,8 +1,10 @@
 defaults:
-  - aws: aws
-  - git: own
-  - dvc: gdrive
-  - docker: docker_config
+  - version_control@version_control.aws: version_control_1
+  - aws@server.aws: server
+  - aws@trainer.aws: trainer
+  - aws@app.aws: app
+  - docker@app.docker: app
+  - docker@server.docker: server
+  - docker@trainer.docker: trainer
   - _self_
 
-code_update: 'corrected Instance Profile Scripts and Checked Basic SSH Scipt.'

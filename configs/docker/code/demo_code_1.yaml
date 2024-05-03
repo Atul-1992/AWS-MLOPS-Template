@@ -1,4 +1,0 @@
-docker_folder: '.'
-dockerfile_name: 'Dockerfile.train'
-image_name: 'demo_image'
-tag: 'v01'
