@@ -1,0 +1,16 @@
+FROM python:3.12-alpine
+
+RUN apk update && apk add --no-cache \
+    build-base \
+    gcc \
+    musl-dev \
+    linux-headers \
+    python3-dev \
+    postgresql-dev
+
+COPY ./code /code
+COPY ./code_config code_config
+COPY ./.dvc ./data_dir.dvc 
+RUN python3 -m venv .venv && pip install -r /code/requirements.txt
+
+ENTRYPOINT [ "/.venv/bin/python" ]

@@ -1,4 +1,5 @@
-dockerfile_name: Dockerfile.server
-image_name: server_image
-tag: v01
-repository_name: server_repo
+dockerfile_name: Dockerfile.app
+image_name: app_image
+tag: v02
+repository_name: app_repo
+docker_dir: ./docker_dir

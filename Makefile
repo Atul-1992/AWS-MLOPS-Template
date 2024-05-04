@@ -9,29 +9,62 @@
 # 	export AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION); \
 # 	echo "AWS credentials exported successfully."
 
+check_configs:
+	python ./src/check_configs.py
+
 init:
-	python ./src/execute/init.py
+	python ./src/init.py
 
-push_code_image_on_ecr:
-	python ./src/execute/push_code_image.py
+push_server_image_on_ecr:
+	python ./src/push_server_image.py
 
-push_app_image_one_ecr:
-	python ./src/execute/push_app_image.py
+push_trainer_image_on_ecr:
+	python ./src/push_trainer_image.py
 
-run_on_ec2:
-	python ./src/execute/run_on_ec2.py
+push_app_image_on_ecr:
+	python ./src/push_app_image.py
 
-version_dataset:
-	python ./src/execute/version_dataset.py
+push_all_images_on_ecr:
+	python ./src/push_server_image.py;
+	python ./src/push_trainer_image.py;
+	python ./src/push_app_image.py;
 
-version_code:
-	python ./src/execute/version_code.py
+create_server_instance:
+	python ./src/create_server_instance.py
+
+create_trainer_instance:
+	python ./src/create_trainer_instance.py
+
+create_app_instance:
+	python ./src/create_app_instance.py
+
+create_all_instances:
+	python ./src/create_server_instance.py;
+	python ./src/create_trainer_instance.py;
+	python ./src/create_app_instance.py;
+
+pull_server_image_in_ec2:
+	python ./src/pull_server_image_in_ec2.py
+	
+pull_trainer_image_in_ec2:
+	python ./src/pull_trainer_image_in_ec2.py
+	
+pull_app_image_in_ec2:
+	python ./src/pull_app_image_in_ec2.py
+
+pull_all_images_in_ec2s:
+	python ./src/pull_server_image_in_ec2.py;
+	python ./src/pull_trainer_image_in_ec2.py;
+	python ./src/pull_app_image_in_ec2.py;
 
 stop_all_instances:
-	python ./src/execute/stop_all_instances.py
+	python ./src/stop_all_instances.py
 
-check_configs:
-	python ./src/execute/check_configs.py
+version_code:
+	python ./src/version_code.py
+
+version_dataset:
+	python ./src/version_dataset.py
 
 ssh_instance:
 	ssh -i my-key-pair.pem ec2-user@<public_ip>

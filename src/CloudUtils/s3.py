@@ -99,3 +99,6 @@ class S3Helper:
             version["VersionId"]: version["Key"]
             for version in response.get("Versions", [])
         }
+
+    def get_bucket_url(self, bucket_name):
+        return f"https://{bucket_name}.s3.amazonaws.com/"

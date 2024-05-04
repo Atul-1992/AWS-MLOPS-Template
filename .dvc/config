@@ -1,4 +1,9 @@
 [core]
     no_scm = True
+    remote = dvc_remote
 ['remote "gdrive"']
     url = https://drive.google.com/drive/folders/1YQKvAM4mhU688OBwIDJYfuz2SOAZqk8c?usp=sharing
+['remote "s3"']
+    url = ../dvc_s3_repo
+['remote "dvc_remote"']
+    url = s3://data_bucket_12344321/

@@ -1,5 +1,6 @@
 
 dockerfile_name: Dockerfile.server
 image_name: server_image
-tag: v01
+tag: v02
 repository_name: server_repo
+docker_dir: ./docker_dir

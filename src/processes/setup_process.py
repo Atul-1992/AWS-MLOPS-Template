@@ -1,14 +1,14 @@
 # ./src/processes/setup_process.py
 import os
 
-from src.CloudUtils.ec2 import EC2Helper
-from src.CloudUtils.ecr import ECRHelper
-from src.CloudUtils.iam import IAMHelper
-from src.CloudUtils.login import AWSCredentialManager
-from src.CloudUtils.s3 import S3Helper
-from src.container.docker_container import DockerHelper
-from src.versionControlUtils.dvc import DVCHelper
-from src.versionControlUtils.git import GitHelper
+from CloudUtils.ec2 import EC2Helper
+from CloudUtils.ecr import ECRHelper
+from CloudUtils.iam import IAMHelper
+from CloudUtils.login import AWSCredentialManager
+from CloudUtils.s3 import S3Helper
+from container.docker_container import DockerHelper
+from versionControlUtils.dvc import DVCHelper
+from versionControlUtils.git import GitHelper
 
 
 class AWSSetup:
@@ -82,10 +82,10 @@ class VersionControlSetup:
         data_remote_name,
         data_remote_repo,
     ) -> None:
-        self.repo_dir = (os.getcwd(),)
-        self.branch = (current_branch,)
-        self.remote_name = (remote_name,)
-        self.remote_url = (remote_url,)
+        self.repo_dir = os.getcwd()
+        self.branch = current_branch
+        self.remote_name = remote_name
+        self.remote_url = remote_url
         self.git_helper = GitHelper(
             repo_dir=self.repo_dir,
             branch=self.branch,
@@ -105,6 +105,7 @@ class VersionControlSetup:
     def initialize_project(self):
         self.git_helper.init()
         self.dvc_helper.init()
+        self.dvc_helper.add_remote()
         self.git_helper.add_to_gitignore(f"/{self.local_data_dir}")
         self.git_helper.add_to_gitignore("/env_files")
         self.git_helper.add(["."])
@@ -137,8 +138,8 @@ class VersionControlSetup:
         return False
 
 
-def setup_aws(cfg):
-    return AWSSetup(docker_folder=cfg.docker.docker_dir)
+def setup_aws(worker):
+    return AWSSetup(docker_folder=worker.docker.docker_dir)
 
 
 def setup_version_control(cfg):

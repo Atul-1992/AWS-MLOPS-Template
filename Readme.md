@@ -140,3 +140,4 @@ This part is our objective to create. We can alway add more cli command to creat
       5.  `make black_format`: format our code with black formatter in `code`, `src` and `app` folder.
 
 **Note:** Commands like `run_on_ec2` and `stop_all_instances` may take time to respond, as they are configured to wait till instances are in `running` or all instances are in `stopped` state. Still It is always good idea to check these on your aws account manually which does not take much effort. Atleast always check status of your command.
+

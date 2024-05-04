@@ -1,5 +1,5 @@
 defaults:
-  - version_control@version_control.aws: version_control_1
+  - version_control: version_control_1
   - aws@server.aws: server
   - aws@trainer.aws: trainer
   - aws@app.aws: app
