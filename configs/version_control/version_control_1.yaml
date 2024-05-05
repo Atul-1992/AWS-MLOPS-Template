@@ -2,6 +2,7 @@ git:
   git_branch: main
   git_remote_name: origin
   git_repo_url: git@github.com:Atulsain7/AWS-MLOPS-Template.git
+  version_message: Everything is working properly, bash scripts needs to be checked, good to go.
 dvc:
   data_remote_repo_url: s3://data_bucket_12344321/
   local_data_dir: data_dir

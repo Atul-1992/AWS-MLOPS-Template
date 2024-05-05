@@ -8,7 +8,7 @@ from utils.utils import config_initializer
 @config_initializer(__file__)
 def main(cfg: DictConfig) -> None:
     version_control = setup_version_control(cfg)
-    version_control.version_code(cfg)
+    version_control.version_code(cfg['version_control']['git']['version_message'])
 
 
 if __name__ == "__main__":
