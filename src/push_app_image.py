@@ -7,12 +7,12 @@ from utils.utils import config_initializer
 
 @config_initializer(__file__)
 def main(cfg: DictConfig) -> None:
-    aws = setup_aws(cfg.app)
+    aws = setup_aws(cfg['app'])
     aws.push_on_ecr(
-        dockerfile_name=cfg.app.docker.dockerfile_name,
-        image_name=cfg.app.docker.image_name,
-        tag=cfg.app.docker.tag,
-        repository_name=cfg.app.docker.repository_name,
+        dockerfile_name=cfg['app']['docker']['dockerfile_name'],
+        image_name=cfg['app']['docker']['image_name'],
+        tag=cfg['app']['docker']['tag'],
+        repository_name=cfg['app']['docker']['repository_name'],
     )
 
 

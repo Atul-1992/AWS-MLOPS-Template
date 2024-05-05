@@ -1,18 +1,6 @@
-FROM python:3.12-alpine
+FROM bitnami/mlflow:latest
 
-# Install build dependencies
-RUN apk update && apk add --no-cache \
-    build-base \
-    gcc \
-    musl-dev \
-    linux-headers \
-    python3-dev \
-    postgresql-dev
-RUN apk add --no-cache cmake
-
-# Install mlflow and its dependencies
-RUN pip install pyarrow mlflow
-
+# Your remaining commands...
 CMD mlflow server \
     --backend-store-uri sqlite:///$(pwd)/demo_sqlite_db/mlflow.db \
     --default-artifact-root file://$(pwd)/demo_artifact_store/ \

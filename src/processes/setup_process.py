@@ -39,15 +39,23 @@ class AWSSetup:
         policy_names,
         instance_profile_name,
         ingress_rules,
+        egress_rules,
         userdata_script,
         environment_variables=None,
     ):
+        # if ingress_rules:
+        #     ingress_rules.
         group_id1 = self.ec2_helper.create_security_group(
             group_name=group_name,
             description="This group is created in aws template with boto3",
             ingress_rules=ingress_rules,
+            egress_rules=egress_rules
         )
-        key_name = self.ec2_helper.check_or_create_key_pair(key_pair_name=key_pair)
+        
+        self.ec2_helper.alter_security_group_permissions(group_id=group_id1,
+                                              ingress_rules=ingress_rules,
+                                              egress_rules=egress_rules)
+        key_name = self.ec2_helper.check_or_create_key_pair(key_pair=key_pair)
         self.iam_helper.create_or_get_role(
             role_name,
             assume_role_policy_document=assume_role_policy_document,
@@ -139,15 +147,15 @@ class VersionControlSetup:
 
 
 def setup_aws(worker):
-    return AWSSetup(docker_folder=worker.docker.docker_dir)
+    return AWSSetup(docker_folder=worker['docker']['docker_dir'])
 
 
 def setup_version_control(cfg):
     return VersionControlSetup(
-        cfg.version_control.git.git_branch,
-        cfg.version_control.git.git_remote_name,
-        cfg.version_control.git.git_repo_url,
-        cfg.version_control.dvc.local_data_dir,
-        cfg.version_control.dvc.data_remote_name,
-        cfg.version_control.dvc.data_remote_repo_url,
+        cfg['version_control']['git']['git_branch'],
+        cfg['version_control']['git']['git_remote_name'],
+        cfg['version_control']['git']['git_repo_url'],
+        cfg['version_control']['dvc']['local_data_dir'],
+        cfg['version_control']['dvc']['data_remote_name'],
+        cfg['version_control']['dvc']['data_remote_repo_url'],
     )

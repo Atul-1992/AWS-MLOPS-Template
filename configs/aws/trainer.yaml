@@ -1,14 +1,21 @@
 defaults:
   - Ingress_rules: ssh
+  - Egress_rules: ssh
   - userdata_script: sample_script
   - instance_profile: instance_profile_1
+  - commands: pull_image
   - _self_
 
 
 region: ap-south-1
 instance_type: t2.micro
 image_id: ami-001843b876406202a
-instance_name: server_instance
-environment_variables: None
-group_name: server_group
-key_pair: aws_template_key
+instance_name: trainer_instance
+environment_variables: 
+  null
+  # AWS_ACCESS_KEY_ID: ${env:AWS_ACCESS_KEY_ID}
+  # AWS_SECRET_ACCESS_KEY: ${env:AWS_SECRET_ACCESS_KEY}
+  # AWS_DEFAULT_REGION: ${env:AWS_DEFAULT_REGION}
+group_name: trainer_group
+key_pair: aws_template_key.pem
+username: ec2-user

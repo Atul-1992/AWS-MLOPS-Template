@@ -10,8 +10,8 @@ This project is created in very modular structure so that we can add and remove 
   - [Template Structure](#template-structure)
   - [Project Setup](#project-setup)
   - [CLI (How to use this template?):](#cli-how-to-use-this-template)
-
-## <a id="project-overview">Project Overview</a>
+---
+## <a id="project-overview"></a>Project Overview
 
 - **Development Environment Setup:**
   - Includes Data Versioning, Code Versioning, Containerization, and deployment of containers to AWS for training in the cloud.
@@ -28,8 +28,8 @@ This project is created in very modular structure so that we can add and remove 
 
 - **Deployment Strategy:**
   - Deploys a Containerized Flask Application in a cloud environment for seamless deployment and scaling.
-
-## <a id="template-structure">Template Structure</a>
+---
+## <a id="template-structure"></a>Template Structure
 
 This template can be reused multiple times. Below are the building blocks of this template for better understanding:
 
@@ -69,16 +69,14 @@ This template can be reused multiple times. Below are the building blocks of thi
    - we can further add more scripts to it using our building block in very easy by adding more functions to `GeneralProcess` class in combine directory and the calling it in script. 
 
 10. **app (Flask):**
-   - Flask app with user registration and authentication feature, it includes it's own sqlite database for user information.
+    - Flask app with user registration and authentication feature, it includes it's own sqlite database for user information.
 
 ---
+## <a id="project-setup"></a>Project Setup
+   Refer to this guide for understanding the structure and purpose of this project template. Customize and utilize the provided building blocks to create robust and scalable machine learning pipelines in a cloud environment.
 
-Refer to this guide for understanding the structure and purpose of this project template. Customize and utilize the provided building blocks to create robust and scalable machine learning pipelines in a cloud environment.
-
-## <a id="project-setup">Project Setup</a>
-
-1. **Installations:**
-   You need to install and setup Git, DVC, Hydra, AWS CLI & boto3, gcc (for makefile), Mlflow and Docker before preceding with this template.
+1. **Installations:**</br>
+   - You need to install and setup Git, DVC, Hydra, AWS CLI & boto3, gcc (for makefile), Mlflow and Docker before preceding with this template.
 
 2. **Git Configuration:**
    - Ensure Git is installed and configured on your machine.
@@ -106,38 +104,64 @@ Refer to this guide for understanding the structure and purpose of this project 
    - For more information on it, please visit -> [Hydra Docs](https://hydra.cc/docs/intro/)
 
 6. **MLFLOW Config:**
-   First make sure that path exists for the `backend store` and `artifact store`, you provided in your server.
-   Second you need to be sure that current_user has read, write and execute permission for this project. Or Else No artifact or track records will be saved programmatically.
+   - First make sure that path exists for the `backend store` and `artifact store`, you provided in your server.
+   - Second you need to be sure that current_user has read, write and execute permission for this project. Or Else No artifact or track records will be saved programmatically.
    I have added `remove_permission_issues.sh` as reference to solve this issue. Also added a sample local server, which will work exactly like remote server, store and pass artifacts and logs by itself, instead of using local environment for that (however that seems to be costlier than directly, anyways we can change that will change of line of code.).
 
-## <a id="cli-how-to-use-this-template">CLI (How to use this template?):</a>
+---
+## <a id="cli-how-to-use-this-template"></a>CLI (How to use this template?):
 This part is our objective to create. We can alway add more cli command to create more processes as per our requirements.
 
-   1. `export_aws_secrets`: set credentials set in `./env_files/aws.env` as environment variables. (You can delete this file after setting credentials, it will not affect functionality.)
+   1. `export_aws_secrets`:</br>
+    set credentials set in `./env_files/aws.env` as environment variables. (You can delete this file after setting credentials, it will not affect functionality.)
 
-   2. `make check_configs`: prints our current config defined in hydra `configs` folder, we can change it it `configs` folder. It is always good idea to check configuration before working with this templates. You can alway edit your configuration in `configs` folder.
+   2. `make check_configs`:</br>
+    prints our current config defined in hydra `configs` folder, we can change it it `configs` folder. It is always good idea to check configuration before working with this templates. You can alway edit your configuration in `configs` folder.
 
-   3. `make init`: start dvc, git, version dataset and git, add remote and push our code and dataset to git and remote storage.
+   3. `make init`:</br>
+    start dvc, git, version dataset and git, add remote and push our code and dataset to git and remote storage.
 
-   4. `make version_dataset`: It tag version to current dataset if there is any change in it and syc it with remote repo.
+   4. `make version_dataset`:</br>
+    It tag version to current dataset if there is any change in it and syc it with remote repo.
 
-   5. `make version_code`: It tag version to our code and syc it with remote repo. It will auto increment version of code and push it to repo with tag.
+   5. `make version_code`:</br>
+    It tag version to our code and syc it with remote repo. It will auto increment version of code and push it to repo with tag.
 
-   6. `make push_code_image_on_ecr`: containerize our code and push it on AWS ECR.It will name and tag our container as as per our configuration.
+   6. `make push_trainer_image_on_ecr`:</br>
+    containerize our code and push it on AWS ECR.It will name and tag our container as as per our configuration.</br>
+   Similar Commands:</br>
+    `push_server_image_on_ecr`, `push_app_image_on_ecr`, `push_all_images_on_ecr`
    
-   7. `make push_app_image_on_ecr`: containerize our app and push it on AWS ECR.It will name and tag our container as as per our configuration.
+   8. `make create_server_instance`:</br>
+    It will create new instance as per our configuration and userdata or start old one with new userdata if instance with the same name already exists.It will also create a `key_pair` to ssh into instance if key_pair does not exits and `.gitignore` it. If you have lost old key_pair, Kindly download it manually and `.gitignore` it to make this code work.</br>
+   Similar Commands:</br>
+   `make create_trainer_instance`, `make create_app_instance`, `make create_all_instances`
 
-   8. `make run_on_ec2`: launches ec2 instance on aws and pull docker container from ecr then run our container.
-   It will create new instance as per our configuration and userdata or start old one with new userdata if instance with the same name already exists.It will also create a `key_pair` to ssh into instance if key_pair does not exits and `.gitignore` it. If you have lost old key_pair, Kindly download it manually and `.gitignore` it to make this code work.
+   9. `make pull_server_image_in_ec2`:</br>
+      pull server image from ecr in relevent ec2 instance, which was pushed by `make push_server_image_on_ecr`.</br>
+      Similar Commands:</br>
+       `make pull_app_image_in_ec2`, `make pull_trainer_image_in_ec2`, `make pull_all_images_in_ec2s`.
 
-   9. `make stop_all_instances`: Will stop all containers in your containers in your aws account, so use it carefully. You can always add or alter code to match your requirements.
+   10. `make stop_all_instances`:</br>
+    Will stop all containers in your containers in your aws account, so use it carefully. You can always add or alter code to match your requirements.
    
-   10. Other Tools:
-      1.  `make write_env_files`:write `requirements.txt` files for `app`, `src` and `code` folder iteratively.
-      2.  `make start_local_server`: start local mlflow server which determine backend store and artifact location. This is for local test only.
-      3.  `make lint`: lint our code in `code`, `src` and `app` directory and returns errors, only.
-      4.  `make score_lint`: returns pylint score
-      5.  `make black_format`: format our code with black formatter in `code`, `src` and `app` folder.
+   11. Other Tools:
 
-**Note:** Commands like `run_on_ec2` and `stop_all_instances` may take time to respond, as they are configured to wait till instances are in `running` or all instances are in `stopped` state. Still It is always good idea to check these on your aws account manually which does not take much effort. Atleast always check status of your command.
+      1.  `make write_env_files`:
+         write `requirements.txt` files for `app`, `src` and `code` folder iteratively.
+
+      2.  `make start_local_server`:
+         start local mlflow server which determine backend store and artifact location. This is for local test only.
+
+      3.  `make lint`:
+         lint our code in `code`, `src` and `app` directory and returns errors, only.
+
+      4.  `make score_lint`:
+         returns pylint score
+         
+      5.  `make black_format`:
+         format our code with black formatter in `code`, `src` and `app` folder.
+
+**Note:** </br>
+Commands like `run_on_ec2` and `stop_all_instances` may take time to respond, as they are configured to wait till instances are in `running` or all instances are in `stopped` state. Still It is always good idea to check these on your aws account manually which does not take much effort. Atleast always check status of your command.
 

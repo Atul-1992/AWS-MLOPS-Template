@@ -1,4 +1,6 @@
+defaults:
+  - assume_role_policy_document: document_1
+
 instance_profile_name: trainer_instance_profile
 role_name: trainer_role
-assume_role_policy_document: '$(aws/instance_profile/assume_role_policy_document)'
 # policy_names: 

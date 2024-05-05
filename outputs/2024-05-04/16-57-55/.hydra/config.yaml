@@ -1,0 +1,174 @@
+version_control:
+  git:
+    git_branch: main
+    git_remote_name: origin
+    git_repo_url: git@github.com:Atulsain7/AWS-MLOPS-Template.git
+  dvc:
+    data_remote_repo_url: s3://data_bucket_12344321/
+    local_data_dir: data_dir
+    data_remote_name: dvc_remote
+server:
+  aws:
+    Ingress_rules:
+      IpRanges:
+      - CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+    userdata_script:
+      script: "'''#!/bin/bash\n  yum update -y\n  yum install -y httpd\n  systemctl\
+        \ start httpd\n  systemctl enable httpd\n  echo \"<html><body><h1>Welcome\
+        \ to My Website</h1></body></html>\" > /var/www/html/index.html'''"
+    instance_profile:
+      assume_role_policy_document:
+        assume_policy_document: "{\n\"Version\": \"2012-10-17\",\n\"Statement\": [\n\
+          \                {\n                  \"Effect\": \"Allow\",\n         \
+          \         \"Principal\": {\n                    \"Service\": \"ec2.amazonaws.com\"\
+          \n                  },\n                  \"Action\": \"sts:AssumeRole\"\
+          \n                }\n              ]\n}\n"
+        policy_names:
+        - AmazonS3ReadOnlyAccess
+        - AmazonEC2ContainerRegistryReadOnly
+      instance_profile_name: trainer_instance_profile
+      role_name: trainer_role
+    commands:
+      pull_image: "#!/bin/bash\n\n# Function to retrieve AWS region from instance\
+        \ metadata\nget_region() {\n    curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone\
+        \ | sed 's/\\(.*\\)[a-z]/\\1/'\n}\n\n# Set AWS region\nexport AWS_DEFAULT_REGION=$(get_region)\n\
+        \n# Function to retrieve ECR login credentials and log in to ECR\necr_login()\
+        \ {\n    $(aws ecr get-login --no-include-email)\n}\n\n# Function to pull\
+        \ container image from ECR\npull_image() {\n    local repository=\"$1\"\n\
+        \    local tag=\"$2\"\n    local image_uri=\"$repository:$tag\"\n    docker\
+        \ pull \"$image_uri\"\n}\n\n# Function to run the container\nrun_container()\
+        \ {\n    local repository=\"$1\"\n    local tag=\"$2\"\n    local container_name=\"\
+        $3\"\n    local image_uri=\"$repository:$tag\"\n    docker run -d --name \"\
+        $container_name\" \"$image_uri\"\n}\n\n# Main function\nmain() {\n    local\
+        \ repository=\"your-ecr-repository\"\n    local tag=\"latest\"\n    local\
+        \ container_name=\"your-container-name\"\n\n    # Log in to ECR\n    ecr_login\n\
+        \n    # Pull container image\n    pull_image \"$repository\" \"$tag\"\n\n\
+        \    # Run container\n    run_container \"$repository\" \"$tag\" \"$container_name\"\
+        \n}\n\n# Execute main function\n  main\n"
+    region: ap-south-1
+    instance_type: t2.micro
+    image_id: ami-001843b876406202a
+    instance_name: server_instance
+    environment_variables: null
+    group_name: server_group
+    key_pair: aws_template_key
+    key_pair_path: ${pwd}/$(key_pair).pem
+  docker:
+    dockerfile_name: Dockerfile.server
+    image_name: server_image
+    tag: v02
+    repository_name: server_repo
+    docker_dir: ./docker_dir
+trainer:
+  aws:
+    Ingress_rules:
+      IpRanges:
+      - CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+    userdata_script:
+      script: "'''#!/bin/bash\n  yum update -y\n  yum install -y httpd\n  systemctl\
+        \ start httpd\n  systemctl enable httpd\n  echo \"<html><body><h1>Welcome\
+        \ to My Website</h1></body></html>\" > /var/www/html/index.html'''"
+    instance_profile:
+      assume_role_policy_document:
+        assume_policy_document: "{\n\"Version\": \"2012-10-17\",\n\"Statement\": [\n\
+          \                {\n                  \"Effect\": \"Allow\",\n         \
+          \         \"Principal\": {\n                    \"Service\": \"ec2.amazonaws.com\"\
+          \n                  },\n                  \"Action\": \"sts:AssumeRole\"\
+          \n                }\n              ]\n}\n"
+        policy_names:
+        - AmazonS3ReadOnlyAccess
+        - AmazonEC2ContainerRegistryReadOnly
+      instance_profile_name: trainer_instance_profile
+      role_name: trainer_role
+    commands:
+      pull_image: "#!/bin/bash\n\n# Function to retrieve AWS region from instance\
+        \ metadata\nget_region() {\n    curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone\
+        \ | sed 's/\\(.*\\)[a-z]/\\1/'\n}\n\n# Set AWS region\nexport AWS_DEFAULT_REGION=$(get_region)\n\
+        \n# Function to retrieve ECR login credentials and log in to ECR\necr_login()\
+        \ {\n    $(aws ecr get-login --no-include-email)\n}\n\n# Function to pull\
+        \ container image from ECR\npull_image() {\n    local repository=\"$1\"\n\
+        \    local tag=\"$2\"\n    local image_uri=\"$repository:$tag\"\n    docker\
+        \ pull \"$image_uri\"\n}\n\n# Function to run the container\nrun_container()\
+        \ {\n    local repository=\"$1\"\n    local tag=\"$2\"\n    local container_name=\"\
+        $3\"\n    local image_uri=\"$repository:$tag\"\n    docker run -d --name \"\
+        $container_name\" \"$image_uri\"\n}\n\n# Main function\nmain() {\n    local\
+        \ repository=\"your-ecr-repository\"\n    local tag=\"latest\"\n    local\
+        \ container_name=\"your-container-name\"\n\n    # Log in to ECR\n    ecr_login\n\
+        \n    # Pull container image\n    pull_image \"$repository\" \"$tag\"\n\n\
+        \    # Run container\n    run_container \"$repository\" \"$tag\" \"$container_name\"\
+        \n}\n\n# Execute main function\n  main\n"
+    region: ap-south-1
+    instance_type: t2.micro
+    image_id: ami-001843b876406202a
+    instance_name: trainer_instance
+    environment_variables: null
+    group_name: trainer_group
+    key_pair: aws_template_key
+    key_pair_path: ${PWD}/$(key_pair).pem
+  docker:
+    dockerfile_name: Dockerfile.trainer
+    image_name: trainer_image
+    tag: v02
+    repository_name: trainer_repo
+    docker_dir: ./docker_dir
+app:
+  aws:
+    Ingress_rules:
+      IpRanges:
+      - CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+    userdata_script:
+      script: "'''#!/bin/bash\n  yum update -y\n  yum install -y httpd\n  systemctl\
+        \ start httpd\n  systemctl enable httpd\n  echo \"<html><body><h1>Welcome\
+        \ to My Website</h1></body></html>\" > /var/www/html/index.html'''"
+    instance_profile:
+      assume_role_policy_document:
+        assume_policy_document: "{\n\"Version\": \"2012-10-17\",\n\"Statement\": [\n\
+          \                {\n                  \"Effect\": \"Allow\",\n         \
+          \         \"Principal\": {\n                    \"Service\": \"ec2.amazonaws.com\"\
+          \n                  },\n                  \"Action\": \"sts:AssumeRole\"\
+          \n                }\n              ]\n}\n"
+        policy_names:
+        - AmazonS3ReadOnlyAccess
+        - AmazonEC2ContainerRegistryReadOnly
+      instance_profile_name: trainer_instance_profile
+      role_name: trainer_role
+    commands:
+      pull_image: "#!/bin/bash\n\n# Function to retrieve AWS region from instance\
+        \ metadata\nget_region() {\n    curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone\
+        \ | sed 's/\\(.*\\)[a-z]/\\1/'\n}\n\n# Set AWS region\nexport AWS_DEFAULT_REGION=$(get_region)\n\
+        \n# Function to retrieve ECR login credentials and log in to ECR\necr_login()\
+        \ {\n    $(aws ecr get-login --no-include-email)\n}\n\n# Function to pull\
+        \ container image from ECR\npull_image() {\n    local repository=\"$1\"\n\
+        \    local tag=\"$2\"\n    local image_uri=\"$repository:$tag\"\n    docker\
+        \ pull \"$image_uri\"\n}\n\n# Function to run the container\nrun_container()\
+        \ {\n    local repository=\"$1\"\n    local tag=\"$2\"\n    local container_name=\"\
+        $3\"\n    local image_uri=\"$repository:$tag\"\n    docker run -d --name \"\
+        $container_name\" \"$image_uri\"\n}\n\n# Main function\nmain() {\n    local\
+        \ repository=\"your-ecr-repository\"\n    local tag=\"latest\"\n    local\
+        \ container_name=\"your-container-name\"\n\n    # Log in to ECR\n    ecr_login\n\
+        \n    # Pull container image\n    pull_image \"$repository\" \"$tag\"\n\n\
+        \    # Run container\n    run_container \"$repository\" \"$tag\" \"$container_name\"\
+        \n}\n\n# Execute main function\n  main\n"
+    region: ap-south-1
+    instance_type: t2.micro
+    image_id: ami-001843b876406202a
+    instance_name: app_instance
+    environment_variables: null
+    group_name: app_group
+    key_pair: aws_template_key
+    key_pair_path: ${pwd}/$(key_pair).pem
+  docker:
+    dockerfile_name: Dockerfile.app
+    image_name: app_image
+    tag: v02
+    repository_name: app_repo
+    docker_dir: ./docker_dir

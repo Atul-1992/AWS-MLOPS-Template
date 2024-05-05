@@ -1,0 +1,52 @@
+# Authenticate Docker with ECR
+pull_image: |
+  #!/bin/bash
+
+  # Function to retrieve AWS region from instance metadata
+  get_region() {
+      curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/\(.*\)[a-z]/\1/'
+  }
+
+  # Set AWS region
+  export AWS_DEFAULT_REGION=$(get_region)
+
+  # Function to retrieve ECR login credentials and log in to ECR
+  ecr_login() {
+      $(aws ecr get-login --no-include-email)
+  }
+
+  # Function to pull container image from ECR
+  pull_image() {
+      local repository="$1"
+      local tag="$2"
+      local image_uri="$repository:$tag"
+      docker pull "$image_uri"
+  }
+
+  # Function to run the container
+  run_container() {
+      local repository="$1"
+      local tag="$2"
+      local container_name="$3"
+      local image_uri="$repository:$tag"
+      docker run -d --name "$container_name" "$image_uri"
+  }
+
+  # Main function
+  main() {
+      local repository="your-ecr-repository"
+      local tag="latest"
+      local container_name="your-container-name"
+
+      # Log in to ECR
+      ecr_login
+
+      # Pull container image
+      pull_image "$repository" "$tag"
+
+      # Run container
+      run_container "$repository" "$tag" "$container_name"
+  }
+
+  # Execute main function
+    main

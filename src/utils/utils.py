@@ -3,7 +3,7 @@ from functools import wraps
 
 import hydra
 from hydra import TaskFunction
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 
 
 class Utils:
@@ -40,6 +40,7 @@ def config_initializer(script_path):
         @hydra.main(config_name="config", config_path=(rel_path), version_base=None)
         @wraps(taskfunction)
         def decorated_main(cfg: DictConfig):
+            cfg = OmegaConf.to_object(cfg)
             return taskfunction(cfg)
 
         return decorated_main

@@ -1,5 +1,7 @@
+import os
 import time
 from typing import List
+import omegaconf
 
 import paramiko
 import paramiko.client
@@ -30,7 +32,7 @@ class EC2Helper:
             return None
 
     def create_security_group(
-        self, group_name, description, ingress_rules: list = None
+        self, group_name, description, ingress_rules = None, egress_rules = None
     ):
         # Define ingress (inbound) rules
         if ingress_rules is None:
@@ -75,23 +77,34 @@ class EC2Helper:
         group_id = security_group["GroupId"]
         print(f"Security group '{group_name}' created with Group ID: {group_id}")
 
-        # Add ingress rules to the security group
-        self.ec2.authorize_security_group_ingress(
-            GroupId=group_id, IpPermissions=ingress_rules
-        )
-
-        print("Ingress rules added to the security group.")
+        self.alter_security_group_permissions(group_id=group_id,
+                                              ingress_rules=ingress_rules,
+                                              egress_rules=egress_rules)
 
         return group_id
 
-    def alter_security_group_permissions(self, group_id, ingress_rules):
+    def alter_security_group_permissions(self, group_id, ingress_rules = None, egress_rules = None):
         try:
             # Update ingress rules for the specified security group
-            self.ec2.authorize_security_group_ingress(
-                GroupId=group_id, IpPermissions=ingress_rules
-            )
-
-            print("Ingress rules updated for the security group.")
+            if ingress_rules is not None:
+                ingress_rules = omegaconf.OmegaConf.to_object(ingress_rules)
+                if isinstance(ingress_rules, dict):
+                    ingress_rules = [ingress_rules]
+                self.ec2.authorize_security_group_ingress(
+                    GroupId=group_id, IpPermissions=ingress_rules
+                )
+                
+            print(f"Ingress rules updated for the security group: {group_id}")
+            
+            if egress_rules is not None:
+                egress_rules = omegaconf.OmegaConf.to_object(egress_rules)
+                if isinstance(egress_rules, dict):
+                    egress_rules = [egress_rules]
+                self.ec2.authorize_security_group_egress(
+                    GroupId=group_id, IpPermissions=egress_rules
+                )
+            
+            print(f"Egress rules updated for the security group: {group_id}")
 
             return True
 
@@ -195,9 +208,11 @@ class EC2Helper:
         security_group_ids: list,
         instance_profile_arn=None,
         environment_variables=None,
-    ):
+        ):
+        
         try:
             # Check if instance with specified name already exists
+            
             if self.check_instance_exists(instance_name):
                 # Get the instance ID
                 instance_id = self.get_instance_id_by_name(instance_name)
@@ -328,7 +343,7 @@ class EC2Helper:
             print(f"Error occurred while stopping EC2 instance '{instance_id}': {e}")
             return False
 
-    def check_or_create_key_pair(self, key_pair_name):
+    def check_or_create_key_pair(self, key_pair):
         """
         Check if an AWS key pair exists with the specified name.
         If not, create a new key pair with the given name.
@@ -341,11 +356,11 @@ class EC2Helper:
                     or None if an error occurred.
         """
         try:
-            response = self.ec2.describe_key_pairs(KeyNames=[key_pair_name])
+            response = self.ec2.describe_key_pairs(KeyNames=[key_pair.split("/")[-1].split('.')[-2]])
             # Key pair already exists
             if response["KeyPairs"]:
-                print(f"Key pair '{key_pair_name}' already exists.")
-                return key_pair_name
+                print(f"Key pair '{key_pair}' already exists.")
+                return key_pair
         except self.ec2.exceptions.ClientError as e:
             error_code = e.response["Error"]["Code"]
             if error_code != "InvalidKeyPair.NotFound":
@@ -354,9 +369,9 @@ class EC2Helper:
 
         try:
             # Create the new key pair
-            response = self.ec2.create_key_pair(KeyName=key_pair_name)
-            print(f"New key pair '{key_pair_name}' created.")
-            return key_pair_name
+            response = self.ec2.create_key_pair(KeyName=key_pair.split("/")[-1].split('.')[-2])
+            print(f"New key pair '{key_pair}' created.")
+            return key_pair
         except Exception as e:
             print(f"New Key could not be created!: {e}")
             return None
@@ -419,20 +434,19 @@ class EC2Helper:
                 for reservation in describe_response["Reservations"]:
                     for instance in reservation["Instances"]:
                         instance_state = instance["State"]["Name"]
-
                         if instance_state != "stopped":
                             all_stopped = False
                             break
 
-                if all_stopped:
-                    print("All instances are now 'stopped'.")
-                    return True
+                    if all_stopped:
+                        print("All instances are now 'stopped'.")
+                        return True
 
                 if time.time() - start_time >= timeout:
                     print("Timeout occurred while waiting for instances to stop.")
                     return False
 
-                time.sleep(15)  # Wait for 15 seconds before checking again
+                time.sleep(5)  # Wait for 15 seconds before checking again
 
         except Exception as e:
             print(f"Error occurred while verifying instance statuses: {e}")
@@ -463,12 +477,19 @@ class EC2Helper:
     def command_instance_with_ssh(
         self, instance_name, private_key_path, port, username, command
     ):
-        public_ip = self.get_public_ip(instance_name)
+        key_path = os.path.normpath(os.path.join(os.getcwd(), private_key_path))
+        print(key_path)
+        # public_ip = self.get_public_ip(instance_name)
+        # print(public_ip)
+        instance = self.describe_instance(instance_name=instance_name)
+        public_dns = instance['PublicDnsName']
+        print("Public DNS: ", public_dns)
         ssh_client = paramiko.SSHClient()
         try:
             ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            private_key = paramiko.RSAKey.from_private_key_file(private_key_path)
-            ssh_client.connect(public_ip, port, username, pkey=private_key)
+            private_key = paramiko.RSAKey.from_private_key_file(key_path)
+            ssh_client.connect(public_dns, port, username, pkey=private_key)
+            print("ssh client connected")
             _, stdout, _ = ssh_client.exec_command(command)
             # Read and print the output of the command
             print(f"Command executed: {command}")

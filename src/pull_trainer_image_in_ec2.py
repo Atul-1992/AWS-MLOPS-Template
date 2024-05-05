@@ -5,15 +5,16 @@ from processes.setup_process import setup_aws
 from utils.utils import config_initializer
 
 
-@config_initializer()
+@config_initializer(__file__)
 def main(cfg: DictConfig):
-    aws = setup_aws(cfg.docker.docker_dir)
+    aws = setup_aws(cfg['trainer'])
     aws.ec2_helper.command_instance_with_ssh(
-        instance_name=cfg.trainer.aws.instance_name,
-        private_key_path=cfg.trainer.aws.intance_key_path,
-        username=cfg.trainer.aws.username,
-        port=cfg.trainer.aws.port,
-        command=cfg.trainer.aws.commands.pull_image,
+        instance_name=cfg['trainer']['aws']['instance_name'],
+        private_key_path=cfg['trainer']['aws']['key_pair'],
+        # username=cfg['trainer']['aws']['username'],
+        username=cfg['trainer']['aws']['username'],
+        port=cfg['trainer']['aws']['Ingress_rules']['rules'][0]['ToPort'],
+        command=cfg['trainer']['aws']['commands']['pull_image'],
     )
     # aws.ec2_helper.command_instance_with_ssh(instance_name=cfg['aws']['ec2']['instance_name'],
     #                                         # private_key_path=cfg['aws']['ec2']['private_key_path'],
